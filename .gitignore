@@ -1,2 +1,8 @@
 lfw_dataset/*
 test_populational/*
+test*
+pretrained_model/*
+*.png
+*.jpg
+*.gif
+*.txt

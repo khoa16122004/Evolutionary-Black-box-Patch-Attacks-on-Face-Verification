@@ -14,7 +14,7 @@ from config_recons import *
 import matplotlib.pyplot as plt
 import random
 from mtcnn import MTCNN
-
+import os
 
 class EarlyStopping:
     def __init__(self, min_improvement=MIN_IMPROVEMENT,
@@ -113,7 +113,7 @@ def apply_patch_to_image(patch, img, original_location):
     img_np[y_min:y_max, x_min:x_max, :] = patch_np.astype('uint8')
     return Image.fromarray(img_np)
 
-def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, transform=transforms.Compose([transforms.ToTensor()])):
+def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, threshold=0.5, transform=transforms.Compose([transforms.ToTensor()])):
     with torch.no_grad():
         adv_batch = torch.stack([transform(img) for img in adv_imgs]).cuda()
         img2_batch = torch.stack([transform(img) for img in img2s]).cuda()
@@ -122,7 +122,18 @@ def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, transform=transforms.Com
         img2_features = MODEL(img2_batch)
         
         sims = F.cosine_similarity(adv_features, img2_features)
-        return ((labels - 1) * sims + labels * sims).cpu().numpy()
+        adv_scores = torch.zeros_like(sims).cuda()
+
+        success_mask = (sims < threshold) & (labels == 0)
+        adv_scores[success_mask] = 1
+        
+        failure_mask = (sims >= threshold) & (labels == 1)
+        adv_scores[failure_mask] = 1
+
+        remaining_mask = ~(success_mask | failure_mask)
+        adv_scores[remaining_mask] = ((labels - 1) * sims + labels * sims)[remaining_mask]
+        
+        return adv_scores.cpu().numpy()
 
 def evaluate_psnr_fitness_batch(patches, original_patches):
     patch_arrays = np.stack([np.array(p) for p in patches])
@@ -132,14 +143,15 @@ def evaluate_psnr_fitness_batch(patches, original_patches):
     g_psnr = np.array([psnr(p[:,:,1], o[:,:,1]) for p, o in zip(patch_arrays, original_arrays)])
     b_psnr = np.array([psnr(p[:,:,2], o[:,:,2]) for p, o in zip(patch_arrays, original_arrays)])
     
-    return (r_psnr + g_psnr + b_psnr) / 3
+    psnr_score = (r_psnr + g_psnr + b_psnr) / 3
+    return psnr_score / 50
 
 def evaluate_fitness_batch(patches, original_patches, original_location, img1s, img2s, labels):
     psnr_fitnesses = evaluate_psnr_fitness_batch(patches, original_patches)
     adv_imgs = [apply_patch_to_image(p, img1, original_location) for p, img1 in zip(patches, img1s)]
     adv_fitnesses = evaluate_adv_fitness_batch(adv_imgs, img2s, labels)
     # return psnr_fitnesses
-    return 1 * psnr_fitnesses + ATTACK_W * adv_fitnesses
+    return RECONS_W * psnr_fitnesses + ATTACK_W * adv_fitnesses
 
 def images_to_arrays(patch1, patch2):
     return np.array(patch1), np.array(patch2)
@@ -235,8 +247,8 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     
     for generation in range(NUMBER_OF_GENERATIONS):
         fitnesses = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
-        
         best_fitness_idx = np.argmax(fitnesses)
+        
         best_fitness = fitnesses[best_fitness_idx]
         best_patch = population[best_fitness_idx]
         
@@ -266,11 +278,10 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
             for idx in top_population_ids:
                 new_population.append(population[idx])
                 
-        if generation % PRINT_EVERY_GEN == 0:
-            print(f"\nGeneration: {generation}")
-            print(f"Current best fitness: {best_fitness:.4f}")
-            print(f"Overall best fitness: {best_fitness_overall:.4f}")
-            print(f"Generations without improvement: {early_stopping.counter}")
+        # if generation % PRINT_EVERY_GEN == 0:
+        #     print(f"\nGeneration: {generation}")
+        #     print(f"Current best fitness: {best_fitness:.4f}")
+        #     print(f"Overall best fitness: {best_fitness_overall:.4f}")
             
         if generation % SAVE_FRAME_FOR_GIF_EVERY == 0:
             save_gif.append(np.array(best_patch))
@@ -320,18 +331,20 @@ def get_landmarks(img, mtcnn, location="nose", box_size=20):
     cv2.rectangle(img_np, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
      
     original_height, original_width = y_max - y_min, x_max - x_min
-    cv2.imwrite("img_np.png", img_np)
+    # cv2.imwrite("img_np.png", img_np)
     
     return (x_min, x_max, y_min, y_max), (original_height, original_width)
 
+
 if __name__ == "__main__":
-    for i in range(len(DATA)):
-        
+    output_dir = f"test_new_loss_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    for i in range(250, len(DATA)):
         mtcnn = MTCNN()
-        
         if i == 100:
             break
-        img1, img2, _, _, label = DATA[i]
+        img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
 
@@ -358,5 +371,5 @@ if __name__ == "__main__":
         
         sim = F.cosine_similarity(adv_fea, img2_fea).item()
         sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
-        output_adv.save(f"test_population/adv_{i}_{sim}_{sim_0}_{label}.png")
-        # break
+        output_adv.save(os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png"))
+        break
