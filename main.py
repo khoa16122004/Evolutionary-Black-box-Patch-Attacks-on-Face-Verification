@@ -125,13 +125,13 @@ def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, threshold=0.5, transform
         adv_scores = torch.zeros_like(sims).cuda()
 
         success_mask = (sims < threshold) & (labels == 0)
-        adv_scores[success_mask] = 1
+        adv_scores[success_mask] = 0.3
         
         failure_mask = (sims >= threshold) & (labels == 1)
-        adv_scores[failure_mask] = 1
+        adv_scores[failure_mask] = 0.3
 
         remaining_mask = ~(success_mask | failure_mask)
-        adv_scores[remaining_mask] = ((labels - 1) * sims + labels * sims)[remaining_mask]
+        adv_scores[remaining_mask] = ((1 - labels) * sims + labels * sims)[remaining_mask]
         
         return adv_scores.cpu().numpy()
 
@@ -144,7 +144,7 @@ def evaluate_psnr_fitness_batch(patches, original_patches):
     b_psnr = np.array([psnr(p[:,:,2], o[:,:,2]) for p, o in zip(patch_arrays, original_arrays)])
     
     psnr_score = (r_psnr + g_psnr + b_psnr) / 3
-    return psnr_score / 50
+    return psnr_score / 40
 
 def evaluate_fitness_batch(patches, original_patches, original_location, img1s, img2s, labels):
     psnr_fitnesses = evaluate_psnr_fitness_batch(patches, original_patches)
@@ -308,7 +308,7 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     return Image.fromarray(np.array(best_patch_overall))
 
 
-def get_landmarks(img, mtcnn, location="nose", box_size=20):
+def get_landmarks(img, mtcnn, location=LOCATION, box_size=20):
     w, h = img.size
     img_np = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
     preds = mtcnn.detect_faces(img_np)
@@ -337,10 +337,12 @@ def get_landmarks(img, mtcnn, location="nose", box_size=20):
 
 
 if __name__ == "__main__":
-    output_dir = f"test_new_loss_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
+    output_dir = f"test_new_loss_{LOCATION}_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
     os.makedirs(output_dir, exist_ok=True)
+    ssr = 0
     
-    for i in range(250, len(DATA)):
+    
+    for i in range(280, len(DATA)):
         mtcnn = MTCNN()
         if i == 100:
             break
