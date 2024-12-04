@@ -124,14 +124,21 @@ def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, threshold=0.5, transform
         sims = F.cosine_similarity(adv_features, img2_features)
         adv_scores = torch.zeros_like(sims).cuda()
 
-        success_mask = (sims < threshold) & (labels == 0)
-        adv_scores[success_mask] = 0.3
         
-        failure_mask = (sims >= threshold) & (labels == 1)
-        adv_scores[failure_mask] = 0.3
+        # if labels == 0, sims down
+        ## if sims < threshold, 
+        # if labels == 1, sims up
+        ## if sims > threshold
+        adv_scores = (1 - labels) * (threshold - sims) + labels * (sims - threshold)
+        
+        # success_mask = (sims < threshold) & (labels == 0)
+        # adv_scores[success_mask] = 0.3
+        
+        # failure_mask = (sims >= threshold) & (labels == 1)
+        # adv_scores[failure_mask] = 0.3
 
-        remaining_mask = ~(success_mask | failure_mask)
-        adv_scores[remaining_mask] = ((1 - labels) * sims + labels * sims)[remaining_mask]
+        # remaining_mask = ~(success_mask | failure_mask)
+        # adv_scores[remaining_mask] = ((labels - 1) * sims + labels * sims)[remaining_mask]
         
         return adv_scores.cpu().numpy()
 
@@ -231,7 +238,8 @@ def plot_fitness_history(fitness_history):
 def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width):
     save_gif = []
     early_stopping = EarlyStopping()
-    population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
+    # population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
+    population = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     
     # Prepare batched inputs
     original_patches = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
@@ -246,7 +254,11 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     pbar = tqdm(total=NUMBER_OF_GENERATIONS)
     
     for generation in range(NUMBER_OF_GENERATIONS):
-        fitnesses = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
+        if generation < 10:
+            adv_imgs = [apply_patch_to_image(p, img1, original_location) for p, img1 in zip(population, img1s)]
+            fitnesses = evaluate_adv_fitness_batch(adv_imgs, img2s, labels)
+        else:
+            fitnesses = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
         best_fitness_idx = np.argmax(fitnesses)
         
         best_fitness = fitnesses[best_fitness_idx]
@@ -293,9 +305,9 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     
     # Save results
     plot_fitness_history(fitness_history)
-    imageio.mimsave("output_gif.gif", save_gif)
+    # imageio.mimsave("output_gif.gif", save_gif)
     best_patch_rgb = cv2.cvtColor(np.array(best_patch_overall), cv2.COLOR_RGB2BGR)
-    cv2.imwrite("output_best.jpg", best_patch_rgb)
+    # cv2.imwrite("output_best.jpg", best_patch_rgb)
     
     with open('optimization_summary.txt', 'w') as f:
         f.write(f"Optimization Summary\n")
@@ -337,7 +349,7 @@ def get_landmarks(img, mtcnn, location=LOCATION, box_size=20):
 
 
 if __name__ == "__main__":
-    output_dir = f"test_new_loss_{LOCATION}_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
+    output_dir = f"original_patch_{LOCATION}_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
     os.makedirs(output_dir, exist_ok=True)
     ssr = 0
     
