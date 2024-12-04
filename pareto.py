@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import random
 from mtcnn import MTCNN
 import os
+import pickle as pkl
 
 class EarlyStopping:
     def __init__(self, min_improvement=MIN_IMPROVEMENT,
@@ -125,20 +126,8 @@ def evaluate_adv_fitness_batch(adv_imgs, img2s, labels, threshold=0.5, transform
         adv_scores = torch.zeros_like(sims).cuda()
 
         
-        # if labels == 0, sims down
-        ## if sims < threshold, 
-        # if labels == 1, sims up
-        ## if sims > threshold
         adv_scores = (1 - labels) * (threshold - sims) + labels * (sims - threshold)
         
-        # success_mask = (sims < threshold) & (labels == 0)
-        # adv_scores[success_mask] = 0.3
-        
-        # failure_mask = (sims >= threshold) & (labels == 1)
-        # adv_scores[failure_mask] = 0.3
-
-        # remaining_mask = ~(success_mask | failure_mask)
-        # adv_scores[remaining_mask] = ((labels - 1) * sims + labels * sims)[remaining_mask]
         
         return adv_scores.cpu().numpy()
 
@@ -153,12 +142,13 @@ def evaluate_psnr_fitness_batch(patches, original_patches):
     psnr_score = (r_psnr + g_psnr + b_psnr) / 3
     return psnr_score / 40
 
+# SO ->, psnr -> , adv ->
 def evaluate_fitness_batch(patches, original_patches, original_location, img1s, img2s, labels):
     psnr_fitnesses = evaluate_psnr_fitness_batch(patches, original_patches)
     adv_imgs = [apply_patch_to_image(p, img1, original_location) for p, img1 in zip(patches, img1s)]
     adv_fitnesses = evaluate_adv_fitness_batch(adv_imgs, img2s, labels)
-    # return psnr_fitnesses
-    return RECONS_W * psnr_fitnesses + ATTACK_W * adv_fitnesses
+    SO_fitnesses = RECONS_W * psnr_fitnesses + ATTACK_W * adv_fitnesses
+    return SO_fitnesses, psnr_fitnesses, adv_fitnesses, adv_imgs 
 
 def images_to_arrays(patch1, patch2):
     return np.array(patch1), np.array(patch2)
@@ -235,11 +225,43 @@ def plot_fitness_history(fitness_history):
     plt.close()
     
 
+def arkive_processing(arkive, new_entry):
+    if len(arkive) == 0:
+        return [new_entry]
+    to_remove = []
+    # đường cong
+
+    # a thống trị b: a['psnr_fitness'] >= b['psnr_fitness'] and a['adv_fitness'] >= b['adv_fitness'] 
+    
+    # nếu tồn tại một item thống trị new_entry
+    for i, item in enumerate(arkive):
+        if new_entry['psnr_fitnesses'] <= item['psnr_fitnesses'] and new_entry['adv_fitnesses'] <= item['adv_fitnesses']:
+            return arkive
+    
+    # nếu new_entry thống trị item-> remove item
+    for i, item in enumerate(arkive):
+        if new_entry['psnr_fitnesses'] > item['psnr_fitnesses'] and new_entry['adv_fitnesses'] > item['adv_fitnesses']:
+            to_remove.append(i)
+            
+    for idx in reversed(to_remove):
+        arkive.pop(idx)
+    arkive.append(new_entry)
+    return arkive
+
+            
+
 def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width):
-    save_gif = []
+    
+    # '''
+    #     akx = [{
+    #         'sims': ,
+    #         'psnr': ,
+    #         'image_with_patch'
+    #     }]
+    # '''
+    arkive = []
     early_stopping = EarlyStopping()
     population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
-    # population = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     
     # Prepare batched inputs
     original_patches = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
@@ -254,21 +276,30 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     pbar = tqdm(total=NUMBER_OF_GENERATIONS)
     
     for generation in range(NUMBER_OF_GENERATIONS):
-        if generation < 10:
-            adv_imgs = [apply_patch_to_image(p, img1, original_location) for p, img1 in zip(population, img1s)]
-            fitnesses = evaluate_adv_fitness_batch(adv_imgs, img2s, labels)
-        else:
-            fitnesses = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
+        fitnesses, psnr_fitnesses, adv_fitnesses, adv_imgs = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
         best_fitness_idx = np.argmax(fitnesses)
         
         best_fitness = fitnesses[best_fitness_idx]
         best_patch = population[best_fitness_idx]
+        best_adv_imgs = adv_imgs[best_fitness_idx] 
+        
+        
+        if generation % INTERVAL_ARKIVE == 0:
+            
+            arkive = arkive_processing(arkive, 
+                                {"psnr_fitnesses": psnr_fitnesses[best_fitness_idx], 
+                                 "adv_fitnesses": adv_fitnesses[best_fitness_idx], 
+                                "adv_img": best_adv_imgs
+                                }
+                            )
         
         if best_fitness > best_fitness_overall:
             best_fitness_overall = best_fitness
-            best_patch_overall = best_patch.copy()
-            # best_path_overal.save(f"{generation}.png")
-        
+            best_adv_imgs = adv_imgs[best_fitness_idx]
+            best_patch_overall = best_patch
+            
+            
+                    
         fitness_history.append(best_fitness)
         
         if early_stopping(best_fitness, best_patch, generation):
@@ -295,8 +326,6 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
         #     print(f"Current best fitness: {best_fitness:.4f}")
         #     print(f"Overall best fitness: {best_fitness_overall:.4f}")
             
-        if generation % SAVE_FRAME_FOR_GIF_EVERY == 0:
-            save_gif.append(np.array(best_patch))
             
         population = new_population
         pbar.update(1)
@@ -304,19 +333,18 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     pbar.close()
     
     # Save results
-    plot_fitness_history(fitness_history)
-    # imageio.mimsave("output_gif.gif", save_gif)
-    best_patch_rgb = cv2.cvtColor(np.array(best_patch_overall), cv2.COLOR_RGB2BGR)
-    # cv2.imwrite("output_best.jpg", best_patch_rgb)
+    # plot_fitness_history(fitness_history)
+    # best_patch_rgb = cv2.cvtColor(np.array(best_patch_overall), cv2.COLOR_RGB2BGR)
     
-    with open('optimization_summary.txt', 'w') as f:
-        f.write(f"Optimization Summary\n")
-        f.write(f"-------------------\n")
-        f.write(f"Best fitness achieved: {best_fitness_overall:.4f}\n")
-        f.write(f"Total generations run: {generation + 1}\n")
-        f.write(f"Early stopping triggered: {generation + 1 < NUMBER_OF_GENERATIONS}\n")
-        f.write(f"Best generation: {early_stopping.best_generation}\n")
-    
+    # with open('optimization_summary.txt', 'w') as f:
+    #     f.write(f"Optimization Summary\n")
+    #     f.write(f"-------------------\n")
+    #     f.write(f"Best fitness achieved: {best_fitness_overall:.4f}\n")
+    #     f.write(f"Total generations run: {generation + 1}\n")
+    #     f.write(f"Early stopping triggered: {generation + 1 < NUMBER_OF_GENERATIONS}\n")
+    #     f.write(f"Best generation: {early_stopping.best_generation}\n")
+    with open('arkiv.pkl', "wb") as f:
+        pkl.dump(arkive, f)
     return Image.fromarray(np.array(best_patch_overall))
 
 
