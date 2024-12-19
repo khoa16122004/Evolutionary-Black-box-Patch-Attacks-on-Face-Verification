@@ -239,9 +239,7 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     save_gif = []
     early_stopping = EarlyStopping()
     population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
-    # population = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     
-    # Prepare batched inputs
     original_patches = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img1s = [img1] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img2s = [img2] * (POPULATION_NUMBER + ELITISM_NUMBER)
@@ -267,7 +265,6 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
         if best_fitness > best_fitness_overall:
             best_fitness_overall = best_fitness
             best_patch_overall = best_patch.copy()
-            # best_path_overal.save(f"{generation}.png")
         
         fitness_history.append(best_fitness)
         
@@ -386,4 +383,4 @@ if __name__ == "__main__":
         sim = F.cosine_similarity(adv_fea, img2_fea).item()
         sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
         output_adv.save(os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png"))
-        break
+        # break

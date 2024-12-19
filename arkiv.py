@@ -4,5 +4,5 @@ with open("arkiv.pkl", "rb") as f:
     arkiv = pkl.load(f)
     
     
-print(arkiv)
+print(len(arkiv))
     

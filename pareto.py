@@ -229,10 +229,7 @@ def arkive_processing(arkive, new_entry):
     if len(arkive) == 0:
         return [new_entry]
     to_remove = []
-    # đường cong
-
     # a thống trị b: a['psnr_fitness'] >= b['psnr_fitness'] and a['adv_fitness'] >= b['adv_fitness'] 
-    
     # nếu tồn tại một item thống trị new_entry
     for i, item in enumerate(arkive):
         if new_entry['psnr_fitnesses'] <= item['psnr_fitnesses'] and new_entry['adv_fitnesses'] <= item['adv_fitnesses']:
@@ -248,22 +245,25 @@ def arkive_processing(arkive, new_entry):
     arkive.append(new_entry)
     return arkive
 
+def final_arkive(merge_arkive):
+    
+    merge_arkive.sort(key=lambda x: (x['psnr_fitnesses'], x['adv_fitnesses']), reverse=True)
+
+    final_arkive = []
+
+    for item in merge_arkive:
+        final_arkive = arkive_processing(final_arkive, item)
+    
+    return final_arkive
+
             
 
-def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width):
+def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width, index):
     
-    # '''
-    #     akx = [{
-    #         'sims': ,
-    #         'psnr': ,
-    #         'image_with_patch'
-    #     }]
-    # '''
     arkive = []
     early_stopping = EarlyStopping()
     population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
     
-    # Prepare batched inputs
     original_patches = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img1s = [img1] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img2s = [img2] * (POPULATION_NUMBER + ELITISM_NUMBER)
@@ -279,13 +279,12 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
         fitnesses, psnr_fitnesses, adv_fitnesses, adv_imgs = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
         best_fitness_idx = np.argmax(fitnesses)
         
-        best_fitness = fitnesses[best_fitness_idx]
-        best_patch = population[best_fitness_idx]
-        best_adv_imgs = adv_imgs[best_fitness_idx] 
+        best_fitness = fitnesses[best_fitness_idx] # best fitness score
+        best_patch = population[best_fitness_idx] # best patch
+        best_adv_imgs = adv_imgs[best_fitness_idx] # assign best patch to img
         
         
         if generation % INTERVAL_ARKIVE == 0:
-            
             arkive = arkive_processing(arkive, 
                                 {"psnr_fitnesses": psnr_fitnesses[best_fitness_idx], 
                                  "adv_fitnesses": adv_fitnesses[best_fitness_idx], 
@@ -320,35 +319,23 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
         if ELITISM:
             for idx in top_population_ids:
                 new_population.append(population[idx])
-                
-        # if generation % PRINT_EVERY_GEN == 0:
-        #     print(f"\nGeneration: {generation}")
-        #     print(f"Current best fitness: {best_fitness:.4f}")
-        #     print(f"Overall best fitness: {best_fitness_overall:.4f}")
-            
             
         population = new_population
         pbar.update(1)
     
     pbar.close()
-    
-    # Save results
-    # plot_fitness_history(fitness_history)
-    # best_patch_rgb = cv2.cvtColor(np.array(best_patch_overall), cv2.COLOR_RGB2BGR)
-    
-    # with open('optimization_summary.txt', 'w') as f:
-    #     f.write(f"Optimization Summary\n")
-    #     f.write(f"-------------------\n")
-    #     f.write(f"Best fitness achieved: {best_fitness_overall:.4f}\n")
-    #     f.write(f"Total generations run: {generation + 1}\n")
-    #     f.write(f"Early stopping triggered: {generation + 1 < NUMBER_OF_GENERATIONS}\n")
-    #     f.write(f"Best generation: {early_stopping.best_generation}\n")
-    with open('arkiv.pkl', "wb") as f:
+
+    with open(f'arkiv_{index}.pkl', "wb") as f:
         pkl.dump(arkive, f)
     return Image.fromarray(np.array(best_patch_overall))
 
 
 def get_landmarks(img, mtcnn, location=LOCATION, box_size=BOX_SIZE):
+    
+    """
+        Take an list of landmarks
+    """
+    
     w, h = img.size
     img_np = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
     preds = mtcnn.detect_faces(img_np)
@@ -382,7 +369,7 @@ if __name__ == "__main__":
     ssr = 0
     
     
-    for i in range(280, len(DATA)):
+    for i in range(0, len(DATA)):
         mtcnn = MTCNN()
         if i == 100:
             break
@@ -395,7 +382,7 @@ if __name__ == "__main__":
             continue
         
         original_patch = take_patch_from_image(img1, original_location)
-        out_patch = whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width)
+        out_patch = whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width, i)
 
         print(f"\nProcessing pair {i+1}/{len(DATA)}")
 
@@ -414,4 +401,4 @@ if __name__ == "__main__":
         sim = F.cosine_similarity(adv_fea, img2_fea).item()
         sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
         output_adv.save(os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png"))
-        break
+        # break
