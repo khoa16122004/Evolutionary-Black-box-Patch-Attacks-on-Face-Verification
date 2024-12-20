@@ -52,7 +52,7 @@ def plot_adv_scatter(psnr_fitnesses, adv_fitnesses, adv_imgs, best_fitness_idx=N
     plt.show()
 
 def main():
-    with open("arkiv_0.pkl", "rb") as f:
+    with open(r"D:\Path-Recontruction-with-Evolution-Strategy\test_loss_nose_0.6_0.4_20000\arkiv_0.pkl", "rb") as f:
         data_list = pkl.load(f)
     
     psnr_fitnesses = [item['psnr_fitnesses'] for item in data_list]

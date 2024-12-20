@@ -226,56 +226,65 @@ def plot_fitness_history(fitness_history):
     
 
 def arkive_processing(arkive, new_entry):
+    '''
+        Domiation definition: x R y if
+        x["pnsr_score] >= y["pnsr_score"] and x["adv_score"] >= y["adv_score"] 
+    '''
+    
     if len(arkive) == 0:
         return [new_entry]
     to_remove = []
-    # a thống trị b: a['psnr_fitness'] >= b['psnr_fitness'] and a['adv_fitness'] >= b['adv_fitness'] 
-    # nếu tồn tại một item thống trị new_entry
+
+    # if exist item dominating new_entry -> no add it to to arkiv
     for i, item in enumerate(arkive):
         if new_entry['psnr_fitnesses'] <= item['psnr_fitnesses'] and new_entry['adv_fitnesses'] <= item['adv_fitnesses']:
             return arkive
     
-    # nếu new_entry thống trị item-> remove item
+    # if new_entry dominates item -> remove item from the arkiv
     for i, item in enumerate(arkive):
         if new_entry['psnr_fitnesses'] > item['psnr_fitnesses'] and new_entry['adv_fitnesses'] > item['adv_fitnesses']:
             to_remove.append(i)
             
+    # remove with not change the index        
     for idx in reversed(to_remove):
         arkive.pop(idx)
     arkive.append(new_entry)
     return arkive
 
 def final_arkive(merge_arkive):
-    
     merge_arkive.sort(key=lambda x: (x['psnr_fitnesses'], x['adv_fitnesses']), reverse=True)
-
     final_arkive = []
-
     for item in merge_arkive:
         final_arkive = arkive_processing(final_arkive, item)
     
     return final_arkive
 
             
-
 def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width, index):
     
-    arkive = []
+    arkive = [] # for pareto save
     early_stopping = EarlyStopping()
+    
+    # create original population with params: with len = POPULATION_NUMBER + ELITISM_NUMBER
     population = create_random_population(POPULATION_NUMBER + ELITISM_NUMBER, original_height, original_width)
     
+    # create original patch, img1s, img2s
     original_patches = [original_patch] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img1s = [img1] * (POPULATION_NUMBER + ELITISM_NUMBER)
     img2s = [img2] * (POPULATION_NUMBER + ELITISM_NUMBER)
     labels = label
     
+    # init
     fitness_history = []
     best_fitness_overall = -float('inf')
     best_patch_overall = None
     
+    # pbar
     pbar = tqdm(total=NUMBER_OF_GENERATIONS)
     
     for generation in range(NUMBER_OF_GENERATIONS):
+        
+        # evaluate population fitness
         fitnesses, psnr_fitnesses, adv_fitnesses, adv_imgs = evaluate_fitness_batch(population, original_patches, original_location, img1s, img2s, labels)        
         best_fitness_idx = np.argmax(fitnesses)
         
@@ -283,22 +292,23 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
         best_patch = population[best_fitness_idx] # best patch
         best_adv_imgs = adv_imgs[best_fitness_idx] # assign best patch to img
         
-        
+        # frequency scores for arkive saving
         if generation % INTERVAL_ARKIVE == 0:
+            # arkive saving
             arkive = arkive_processing(arkive, 
                                 {"psnr_fitnesses": psnr_fitnesses[best_fitness_idx], 
                                  "adv_fitnesses": adv_fitnesses[best_fitness_idx], 
                                 "adv_img": best_adv_imgs
                                 }
                             )
-        
+            
+        # choosing the best with single objectives
         if best_fitness > best_fitness_overall:
             best_fitness_overall = best_fitness
             best_adv_imgs = adv_imgs[best_fitness_idx]
             best_patch_overall = best_patch
             
             
-                    
         fitness_history.append(best_fitness)
         
         if early_stopping(best_fitness, best_patch, generation):
@@ -315,7 +325,8 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
             if random.random() < MUTATION_CHANCE:
                 new_patch = mutate(new_patch, MUTATION_STRENGTH, original_height, original_width)
             new_population.append(new_patch)
-            
+        
+        # keep best tinh túy    
         if ELITISM:
             for idx in top_population_ids:
                 new_population.append(population[idx])
@@ -325,9 +336,8 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
     
     pbar.close()
 
-    with open(f'arkiv_{index}.pkl', "wb") as f:
-        pkl.dump(arkive, f)
-    return Image.fromarray(np.array(best_patch_overall))
+
+    return Image.fromarray(np.array(best_patch_overall)), arkive
 
 
 def get_landmarks(img, mtcnn, location=LOCATION, box_size=BOX_SIZE):
@@ -368,27 +378,31 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
     ssr = 0
     
-    
-    for i in range(0, len(DATA)):
+    for i in range(0, len(DATA)):    
         mtcnn = MTCNN()
         if i == 100:
             break
+        
         img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
-
+        
         original_location, (original_height, original_width)  = get_landmarks(img1, mtcnn)
         if not original_location:
             continue
         
         original_patch = take_patch_from_image(img1, original_location)
-        out_patch = whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width, i)
+        
+        # evolutionary pipeline
+        out_patch, arkiv = whole_pipeline(original_patch, img1, img2, label, 
+                                   original_location, original_height, 
+                                   original_width, i)
+
+
 
         print(f"\nProcessing pair {i+1}/{len(DATA)}")
 
         output_adv = apply_patch_to_image(out_patch, img1, original_location)
-
-        # img2.save(f"img2_{i}.png")
         
         img1_adv = transforms.ToTensor()(output_adv).cuda()
         img2 = transforms.ToTensor()(img2).cuda()
@@ -400,5 +414,11 @@ if __name__ == "__main__":
         
         sim = F.cosine_similarity(adv_fea, img2_fea).item()
         sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
-        output_adv.save(os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png"))
-        # break
+        
+        output_path = os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png")
+        output_adv.save(output_path)
+        
+        output_arkiv_path = output_path.join(output_dir, f'arkiv_{i}.pkl')
+        
+        with open(output_arkiv_path, "wb") as f:
+            pkl.dump(arkiv, f)
