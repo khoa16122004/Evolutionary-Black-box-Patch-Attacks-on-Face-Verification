@@ -17,6 +17,7 @@ from mtcnn import MTCNN
 import os
 import pickle as pkl
 
+
 class EarlyStopping:
     def __init__(self, min_improvement=MIN_IMPROVEMENT,
                  target_fitness=TARGET_FITNESS):
@@ -150,6 +151,9 @@ def evaluate_fitness_batch(patches, original_patches, original_location, img1s, 
     SO_fitnesses = RECONS_W * psnr_fitnesses + ATTACK_W * adv_fitnesses
     return SO_fitnesses, psnr_fitnesses, adv_fitnesses, adv_imgs 
 
+    # return psnr_fitnesses, psnr_fitnesses, [0] * len(psnr_fitnesses), adv_imgs
+
+
 def images_to_arrays(patch1, patch2):
     return np.array(patch1), np.array(patch2)
 
@@ -175,7 +179,7 @@ def cut_and_merge(patch1, patch2, original_height, original_width):
     y_cut = random.randint(0, original_width - 1)
     patch1_arr[x_cut:, y_cut:] = patch2_arr[x_cut:, y_cut:]
     return Image.fromarray(patch1_arr.astype('uint8'))
-
+ 
 def single_point_crossover(patch1, patch2, original_height, original_width):
     patch1_arr, patch2_arr = images_to_arrays(patch1, patch2)
     cut_point = random.randint(0, original_height - 1)
@@ -225,24 +229,32 @@ def plot_fitness_history(fitness_history):
     plt.close()
     
 
-def arkive_processing(arkive, new_entry):
+def is_dorminanted(x, y):
     '''
         Domiation definition: x R y if
         x["pnsr_score] >= y["pnsr_score"] and x["adv_score"] >= y["adv_score"] 
     '''
     
+    if x["psnr_fitnesses"] >= y["psnr_fitnesses"] and x["adv_fitnesses"] >= y["adv_fitnesses"]:
+        return True
+    return False
+
+def arkive_processing(arkive, new_entry):
+ 
     if len(arkive) == 0:
         return [new_entry]
     to_remove = []
 
     # if exist item dominating new_entry -> no add it to to arkiv
     for i, item in enumerate(arkive):
-        if new_entry['psnr_fitnesses'] <= item['psnr_fitnesses'] and new_entry['adv_fitnesses'] <= item['adv_fitnesses']:
+        if is_dorminanted(item, new_entry):
+        # if new_entry['psnr_fitnesses'] <= item['psnr_fitnesses'] and new_entry['adv_fitnesses'] <= item['adv_fitnesses']:
             return arkive
     
     # if new_entry dominates item -> remove item from the arkiv
     for i, item in enumerate(arkive):
-        if new_entry['psnr_fitnesses'] > item['psnr_fitnesses'] and new_entry['adv_fitnesses'] > item['adv_fitnesses']:
+        # if new_entry['psnr_fitnesses'] > item['psnr_fitnesses'] and new_entry['adv_fitnesses'] > item['adv_fitnesses']:
+        if is_dorminanted(new_entry, item):
             to_remove.append(i)
             
     # remove with not change the index        
@@ -251,18 +263,11 @@ def arkive_processing(arkive, new_entry):
     arkive.append(new_entry)
     return arkive
 
-def final_arkive(merge_arkive):
-    merge_arkive.sort(key=lambda x: (x['psnr_fitnesses'], x['adv_fitnesses']), reverse=True)
-    final_arkive = []
-    for item in merge_arkive:
-        final_arkive = arkive_processing(final_arkive, item)
-    
-    return final_arkive
 
-            
-def whole_pipeline(original_patch, img1, img2, label, original_location, original_height, original_width, index):
+
+
+def whole_pipeline(arkive, original_patch, img1, img2, label, original_location, original_height, original_width, index):
     
-    arkive = [] # for pareto save
     early_stopping = EarlyStopping()
     
     # create original population with params: with len = POPULATION_NUMBER + ELITISM_NUMBER
@@ -298,7 +303,7 @@ def whole_pipeline(original_patch, img1, img2, label, original_location, origina
             arkive = arkive_processing(arkive, 
                                 {"psnr_fitnesses": psnr_fitnesses[best_fitness_idx], 
                                  "adv_fitnesses": adv_fitnesses[best_fitness_idx], 
-                                "adv_img": best_adv_imgs
+                                 "adv_img": best_adv_imgs
                                 }
                             )
             
@@ -374,51 +379,61 @@ def get_landmarks(img, mtcnn, location=LOCATION, box_size=BOX_SIZE):
 
 
 if __name__ == "__main__":
-    output_dir = f"test_loss_{LOCATION}_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}"
+    random.seed(SEED)
+    
+    output_dir = f"new_{RECONS_W}_{ATTACK_W}_{NUMBER_OF_GENERATIONS}_{SEED}"
     os.makedirs(output_dir, exist_ok=True)
     ssr = 0
     
-    for i in range(0, len(DATA)):    
+    for i in range(2, len(DATA)):    
         mtcnn = MTCNN()
         if i == 100:
             break
         
-        img1, img2, label = DATA[i]
-        img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
+        # init pareto arkive
+        arkive = []
         
-        original_location, (original_height, original_width)  = get_landmarks(img1, mtcnn)
-        if not original_location:
-            continue
+        for location in ['left_eye', 'right_eye', 'nose']:
+            img1, img2, label = DATA[i]
+            img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
-        original_patch = take_patch_from_image(img1, original_location)
-        
-        # evolutionary pipeline
-        out_patch, arkiv = whole_pipeline(original_patch, img1, img2, label, 
-                                   original_location, original_height, 
-                                   original_width, i)
+            original_location, (original_height, original_width)  = get_landmarks(img1, mtcnn, location)
+            if not original_location:
+                continue
+            
+            original_patch = take_patch_from_image(img1, original_location)
+            
+            # evolutionary pipeline
+            out_patch, arkive = whole_pipeline(arkive, original_patch, img1, img2, label, 
+                                    original_location, original_height, 
+                                    original_width, i)
 
 
 
-        print(f"\nProcessing pair {i+1}/{len(DATA)}")
+            print(f"\nProcessing pair {i+1}/{len(DATA)}")
 
-        output_adv = apply_patch_to_image(out_patch, img1, original_location)
+        #     output_adv = apply_patch_to_image(out_patch, img1, original_location)
+            
+        #     img1_adv = transforms.ToTensor()(output_adv).cuda()
+        #     img2 = transforms.ToTensor()(img2).cuda()
+        #     img1 = transforms.ToTensor()(img1).cuda()
+            
+        #     adv_fea = MODEL(img1_adv.unsqueeze(0))
+        #     img2_fea = MODEL(img2.unsqueeze(0))
+        #     img1_fea = MODEL(img1.unsqueeze(0))
+            
+        #     sim = F.cosine_similarity(adv_fea, img2_fea).item()
+        #     sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
+            
+        # output_path = os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png")
+        # output_adv.save(output_path)
         
-        img1_adv = transforms.ToTensor()(output_adv).cuda()
-        img2 = transforms.ToTensor()(img2).cuda()
-        img1 = transforms.ToTensor()(img1).cuda()
-        
-        adv_fea = MODEL(img1_adv.unsqueeze(0))
-        img2_fea = MODEL(img2.unsqueeze(0))
-        img1_fea = MODEL(img1.unsqueeze(0))
-        
-        sim = F.cosine_similarity(adv_fea, img2_fea).item()
-        sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
-        
-        output_path = os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png")
-        output_adv.save(output_path)
-        
-        output_arkiv_path = output_path.join(output_dir, f'arkiv_{i}.pkl')
+        output_arkiv_path = os.path.join(output_dir, f'arkiv_{i}.pkl')
         
         with open(output_arkiv_path, "wb") as f:
-            pkl.dump(arkiv, f)
+            pkl.dump(arkive, f)
+
+
+
+# tấn công nhiều vùng, thêm(x,y)
