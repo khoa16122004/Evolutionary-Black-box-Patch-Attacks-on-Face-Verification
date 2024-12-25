@@ -6,6 +6,7 @@ class Individual:
         # X = []
         
         self.X = None
+        
         self.F = None # fitness
         self.hashKey = None
         self.data = kwargs

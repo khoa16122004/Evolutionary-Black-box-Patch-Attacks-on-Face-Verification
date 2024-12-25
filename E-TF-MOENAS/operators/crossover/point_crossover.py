@@ -2,7 +2,6 @@ import numpy as np
 
 from model.population import Population
 from operators.crossover import Crossover
-from utils import check_valid, get_hashKey
 
 def crossover(parent_1, parent_2, typeC, **kwargs):
     

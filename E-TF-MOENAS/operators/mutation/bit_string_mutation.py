@@ -56,7 +56,7 @@ class BitStringMutation(Mutation):
                 )
                 cv.line(image_with_shapes, pt1, pt2, color, thickness)
 
-        return image_with_shapes
+        return image_with_shapes # 3d
 
     def mutation(self, problem, P, O, **kwargs):
         O_old_X = O.get('X')
@@ -66,7 +66,7 @@ class BitStringMutation(Mutation):
 
         nMutations, maxMutations = 0, offspring_size * 5
 
-        self.prob = 0.4
+        self.prob = 0.2
 
         O_new = Population(offspring_size)
 

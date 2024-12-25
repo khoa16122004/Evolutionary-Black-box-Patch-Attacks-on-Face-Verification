@@ -61,12 +61,13 @@ def popop(args):
         if i == 100:
             break
         
+        img1, img2, label = DATA[i]
+        img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
+        img1_np, img2_np = np.array(img1), np.array(img2)
         for region in ['left_eye', 'right_eye', 'nose']:
-            img1, img2, label = DATA[i]
-            img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
-            img1_np, img2_np = np.array(img1), np.array(img2)
+
             location = get_landmarks(img1_np, mtcnn, region, args.patch_size)
-            
+            print(location)
             prob = PatchFaceAttack(args.n_eval, location, MODEL, img1_np, img2_np, label, args.patch_size)
             sampling = RandomSampling(n_sample=args.pop_size, patch_size=args.patch_size)
             crossover = PointCrossover('SE')
@@ -74,26 +75,28 @@ def popop(args):
             algorithm.set_hyperparameters(pop_size=args.pop_size, 
                                           sampling=sampling,
                                           crossover=crossover,
-                                          mutation=BitStringMutation(),
+                                          mutation=BitStringMutation(args.patch_size),
                                           survival=RankAndCrowdingSurvival(),
                                           debug=True)
             
-            algorithm.solve(prob, 22520692)
+            algorithm.solve(prob, 22520691)
 
             F = algorithm.E_Archive_search.F
             X = algorithm.E_Archive_search.X
             
             data = {
                 'X': X,
-                'F': F
+                'F': F,
+                'location': location,
+                'patch_size': args.patch_size, 
             }
             
-            output_dir = f"nsgaII_neval={args.n_eval}_popsize={args.pop_size}"
+            output_dir = f"nsgaII_neval={args.n_eval}_popsize={args.pop_size}_patchsize={args.patch_size}"
             output_region_dir= os.path.join(output_dir, region)
             os.makedirs(output_region_dir, exist_ok=True)
 
             output_file = os.path.join(output_region_dir, f"{i}.pkl")
-            with open(output_file, 'wb') as f:
+            with open(output_file, 'wb+') as f:
                 pkl.dump(data, f)
             
 
