@@ -32,7 +32,14 @@ def crossover(parent_1, parent_2, typeC, **kwargs):
         pts = np.random.randint(0, 2, parent_1.shape, dtype=bool)
 
         offspring_1[pts], offspring_2[pts] = offspring_2[pts], offspring_1[pts].copy()
+    
+    elif typeC == 'SE': 
+            segment_start = np.random.randint(0, len(parent_1) - 1)
+            segment_length = np.random.randint(1, len(parent_1) - segment_start)
+            segment_end = segment_start + segment_length
 
+            offspring_1[segment_start:segment_end], offspring_2[segment_start:segment_end] = \
+                offspring_2[segment_start:segment_end], offspring_1[segment_start:segment_end].copy()
 
     
     return [offspring_1, offspring_2]
@@ -41,15 +48,13 @@ def crossover(parent_1, parent_2, typeC, **kwargs):
 class PointCrossover(Crossover):
     def __init__(self, method=None):
         super().__init__(n_parents=2, prob=0.9)
-        available_methods = ['1X', '2X', 'UX']
+        available_methods = ['1X', '2X', 'UX', 'SE']
         if method not in available_methods:
             raise ValueError('Invalid crossover method: ' + method)
         else:
             self.method = method
 
     def _do(self, problem, P, **kwargs):
-        # return một Population object
-        # problem_name = problem.name
         problem_name = 'cc'
         offspring_size = len(P)
         O = Population(offspring_size) # emty pop with size
@@ -62,17 +67,14 @@ class PointCrossover(Crossover):
             P_ = P[I]
             for i in range(len(P_)):
                 if np.random.random() < self.prob:
-                    # print(P_[i][0].X, P_[i][1].X)
                     o_X = crossover(P_[i][0].X, P_[i][1].X, self.method, problem_name=problem_name)
-                    # print(o_X[0], o_X[1])
-                    # print('_'*30)
                     for j, X in enumerate(o_X):
-                        # if problem.isValid(o_X[j]):
                         if maxCrossovers - nCrossovers > 0:
                             O[n].set('X', o_X[j])
                             n += 1
                             if n - offspring_size == 0:
                                 return O
+                
                 else:
                     for o in P_[i]:
                         O[n].set('X', o.X)

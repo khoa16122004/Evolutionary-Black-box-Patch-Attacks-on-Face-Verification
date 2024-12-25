@@ -52,15 +52,15 @@ img1, img2, label = DATA[30]
 img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
 
 img1_np, img2_np = np.array(img1), np.array(img2)
-location, (w, h) = (80, 90, 95, 105), (10, 10)
+location, (w, h) = (50, 60, 50, 60), (10, 10)
 
 
 img_advs = [apply_patch_to_image(imgs_3d[i], img1_np.copy(), location) for i in range(imgs_3d.shape[0])]
 print("Diff: ", (img_advs[0] - img_advs[1]).sum())
 
-cv.imwrite("0.png", cv.cvtColor(img_advs[0], cv.COLOR_BGR2RGB))
-cv.imwrite("1.png", cv.cvtColor(img_advs[1], cv.COLOR_BGR2RGB))
-cv.imwrite("2.png", cv.cvtColor(img_advs[20], cv.COLOR_BGR2RGB))
+# cv.imwrite("0.png", cv.cvtColor(img_advs[0], cv.COLOR_BGR2RGB))
+# cv.imwrite("1.png", cv.cvtColor(img_advs[1], cv.COLOR_BGR2RGB))
+# cv.imwrite("2.png", cv.cvtColor(img_advs[20], cv.COLOR_BGR2RGB))
 
 pareto_points = pareto_front(points)
 
