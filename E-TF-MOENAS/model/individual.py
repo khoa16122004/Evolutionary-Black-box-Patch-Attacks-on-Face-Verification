@@ -3,6 +3,8 @@ import copy
 
 class Individual:
     def __init__(self, **kwargs) -> None:
+        # X = []
+        
         self.X = None
         self.F = None # fitness
         self.hashKey = None

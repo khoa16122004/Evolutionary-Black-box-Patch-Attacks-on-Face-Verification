@@ -166,7 +166,6 @@ def random_horizontal_swap(patch1, patch2, original_height, original_width):
     patch1_arr[horizontal_random_choice] = patch2_arr[horizontal_random_choice]
     return Image.fromarray(patch1_arr.astype('uint8'))
 
-# pymoo: NSGA-IIx
 
 def random_vertical_swap(patch1, patch2, original_height, original_width):
     patch1_arr, patch2_arr = images_to_arrays(patch1, patch2)
