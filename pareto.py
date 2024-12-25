@@ -16,6 +16,7 @@ import random
 from mtcnn import MTCNN
 import os
 import pickle as pkl
+from multiprocessing import Pool
 
 
 class EarlyStopping:
@@ -165,7 +166,7 @@ def random_horizontal_swap(patch1, patch2, original_height, original_width):
     patch1_arr[horizontal_random_choice] = patch2_arr[horizontal_random_choice]
     return Image.fromarray(patch1_arr.astype('uint8'))
 
-
+# pymoo: NSGA-IIx
 
 def random_vertical_swap(patch1, patch2, original_height, original_width):
     patch1_arr, patch2_arr = images_to_arrays(patch1, patch2)
@@ -208,8 +209,23 @@ def crossover(patch1, patch2, original_height, original_width):
         return two_point_crossover(patch1, patch2, original_height, original_width)
 
 
+# def change_location(img1, patch1, location, original_height, original_width, segment_range):
+    
+#     # segment_range là một list các vị trí
+    
+#     [x_min, x_max, y_min, y_max] = location
+    
+#     # lấy random một vị trí sao cho: x_random + original_width (tương tự với h) ko vượt quá những vị trí của segment range 
+#     new_location = 
+    
+#     new_img = apply_patch_to_image(patch1, img1, new_location)
+#     new_path = take_patch_from_image(new_img, new_location)
+
+
 def mutate(patch, number_of_times, original_height, original_width):
     return add_random_shape_to_image(patch, number_of_times, original_height, original_width)
+
+
 
 def get_parents(local_population, local_fitnesses):
     fitness_sum = sum(np.exp(local_fitnesses))

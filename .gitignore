@@ -7,3 +7,4 @@ pretrained_model/*
 *.jpg
 *.gif
 *.txt
+*.pt

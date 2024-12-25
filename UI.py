@@ -6,7 +6,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import pickle as pkl
 
-with open(r"D:\Path-Recontruction-with-Evolution-Strategy\new_0.8_0.2_1000_22520691\arkiv_2.pkl", "rb") as f:
+with open(r"D:\Path-Recontruction-with-Evolution-Strategy\new_0.5_0.5_10000_22520691\arkiv_9.pkl", "rb") as f:
     data_list = pkl.load(f)
 
 points = np.array([[d["psnr_fitnesses"], d["adv_fitnesses"]] for d in data_list])
