@@ -44,7 +44,7 @@ class Fitness:
         b_psnr = np.array([psnr(p[:,:,2], self.original_patch[:,:,2]) for p in patchs_3d])
 
         psnr_score = (r_psnr + g_psnr + b_psnr) / 3
-        psnr_score = np.maximum(0, psnr_score)
+        # psnr_score = np.maximum(0, psnr_score)
         # print(psnr_score.shape)
         
         return psnr_score / 200
@@ -69,13 +69,14 @@ class Fitness:
             adv_scores = torch.zeros_like(sims).cuda()
 
             adv_scores = (1 - self.label) * (threshold - sims) + self.label * (sims - threshold)
-            adv_scores = torch.clamp(adv_scores, min=0)
+            # adv_scores = torch.clamp(adv_scores, min=0)
         
         return adv_scores.cpu().numpy()
         
     def benchmark(self, patchs):
         adv_scores = self.evaluate_adv(patchs)
         psnr_scores = self.evaluate_psnr(patchs)
+        print("Adv scores: ", adv_scores.max())
         return adv_scores, psnr_scores
         
         psnr_scores = self.evaluate_psnr(patchs)
