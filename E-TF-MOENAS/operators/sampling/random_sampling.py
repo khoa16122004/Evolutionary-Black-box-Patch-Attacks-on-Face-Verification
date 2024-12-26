@@ -27,11 +27,11 @@ class RandomSampling:
             shape_type = random.choice(shape_types)
 
             color = (
-                random.randint(0, 255),
-                random.randint(0, 255),
-                random.randint(0, 255)
+                0.8 * random.randint(0, 255),
+                0.8 * random.randint(0, 255),
+                0.8 * random.randint(0, 255)
             )
-            thickness = random.randint(1, 5)
+            thickness = 1
 
             # if shape_type == 'circle':
             #     center = (
@@ -66,16 +66,16 @@ class RandomSampling:
             #     end_angle = 360
             #     cv.ellipse(image_with_shapes, center, axes, angle, start_angle, end_angle, color, thickness)
 
-            elif shape_type == 'line':
-                pt1 = (
-                    random.randint(0, width - 1),
-                    random.randint(0, height - 1)
-                )
-                pt2 = (
-                    random.randint(0, width - 1),
-                    random.randint(0, height - 1)
-                )
-                cv.line(image_with_shapes, pt1, pt2, color, thickness)
+            # elif shape_type == 'line':
+            #     pt1 = (
+            #         random.randint(0, width - 1),
+            #         random.randint(0, height - 1)
+            #     )
+            #     pt2 = (
+            #         random.randint(0, width - 1),
+            #         random.randint(0, height - 1)
+            #     )
+            #     cv.line(image_with_shapes, pt1, pt2, color, thickness)
 
         return image_with_shapes
     

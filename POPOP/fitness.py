@@ -44,8 +44,10 @@ class Fitness:
         b_psnr = np.array([psnr(p[:,:,2], self.original_patch[:,:,2]) for p in patchs_3d])
 
         psnr_score = (r_psnr + g_psnr + b_psnr) / 3
+        psnr_score = np.maximum(0, psnr_score)
+        # print(psnr_score.shape)
         
-        return psnr_score / 40 
+        return psnr_score / 200
 
     def apply_patch_to_image(self, patch):
         patchs_3d = self.convert_to_3d(np.array([patch]))
@@ -67,20 +69,26 @@ class Fitness:
             adv_scores = torch.zeros_like(sims).cuda()
 
             adv_scores = (1 - self.label) * (threshold - sims) + self.label * (sims - threshold)
-            
-            return adv_scores.cpu().numpy()
+            adv_scores = torch.clamp(adv_scores, min=0)
+        
+        return adv_scores.cpu().numpy()
         
     def benchmark(self, patchs):
-        adv_scores = - self.evaluate_adv(patchs)
-        psnr_scores = - self.evaluate_psnr(patchs)
+        adv_scores = self.evaluate_adv(patchs)
+        psnr_scores = self.evaluate_psnr(patchs)
         return adv_scores, psnr_scores
         
-        # psnr_scores = self.evaluate_psnr(patchs)
-        # return 0, psnr_scores
+        psnr_scores = self.evaluate_psnr(patchs)
+        return 0, psnr_scores
         
     def __call__(self, patches):
         adv, psnr = self.benchmark(patchs=patches)
-        return ATTACK_W * adv + RECONS_W * psnr
+        # print("ADV: ", adv.max())
+        # print("PSNR: ", psnr.max())
+        fitness = ATTACK_W * adv + RECONS_W * psnr
+        
+        print(fitness.max())
+        return fitness
         # return psnr
 if __name__ == '__main__':
     from get_architech import get_model

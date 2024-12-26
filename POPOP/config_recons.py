@@ -21,8 +21,8 @@ ELITISM_NUMBER = 6
 STARTING_SHAPE_NUMBER = 6
 PRINT_EVERY_GEN = 25
 SAVE_FRAME_FOR_GIF_EVERY = 100
-ATTACK_W = 0.3
-RECONS_W = 0.7
+ATTACK_W = 0.0001
+RECONS_W = 0.9999
 INTERVAL_ARKIVE = 2
 MIN_IMPROVEMENT = 10
 TARGET_FITNESS = 0.6
@@ -34,3 +34,7 @@ PRECOMPUTED_COLORS = [(random.randint(0,255), random.randint(0,255), random.rand
 COLOR_INDEX = 0
 LOCATION = 'left_eye' # keys = ['left_eye', 'right_eye', 'nose', 'mouth_left', 'mouth_right']
 SEED = 22520691
+
+
+# a, b: a càng nhỏ càng tốt, b càng nhỏ càng tốt
+# f = w1a + w2b

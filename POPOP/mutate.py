@@ -16,7 +16,7 @@ class Mutation:
         image_with_shapes = patch_3d.copy()
         height, width = patch_3d.shape[:2]
 
-        shape_types = ['rectangle', 'line', 'circle', 'gaussian_noise', 'color_blending']
+        shape_types = ['circle', 'gaussian_noise', 'color_blending']
 
         for _ in range(number_of_shapes):
             shape_type = random.choice(shape_types)
@@ -29,19 +29,8 @@ class Mutation:
                         
             thickness = 1
 
-            if shape_type == 'rectangle':
-                pt1 = (
-                    random.randint(0, width - 1),
-                    random.randint(0, height - 1)
-                )
-                pt2 = (
-                    random.randint(0, width - 1),
-                    random.randint(0, height - 1)
-                )
-                cv.rectangle(image_with_shapes, pt1, pt2, color, thickness)
 
-
-            elif shape_type == 'circle':
+            if shape_type == 'circle':
                 center = (
                     random.randint(0, width - 1),
                     random.randint(0, height - 1)

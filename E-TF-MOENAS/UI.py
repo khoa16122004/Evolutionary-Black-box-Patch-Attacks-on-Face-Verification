@@ -52,7 +52,7 @@ def main():
     location = data_list['location']
     # patch_size = data_list['patch_size']
     
-    imgs_3d = convert_to_3d(imgs, 20)
+    imgs_3d = convert_to_3d(imgs, args.patch_size)
 
     img1, img2, label = DATA[args.image_index]
     img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))

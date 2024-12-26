@@ -20,7 +20,7 @@ if __name__ == "__main__":
     patch_size = 20
     population_size = 50 # số cá thể trong quần thể
     number_of_shapes = 5 # số hình vẽ ngẫu nhiên
-    number_of_generations = 10000 # số thế hệ
+    number_of_generations = 1000 # số thế hệ
 
     # khởi tạo các hàm 
     fitness_func = Fitness(location=location, 
