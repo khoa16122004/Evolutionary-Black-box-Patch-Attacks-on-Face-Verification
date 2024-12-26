@@ -36,6 +36,7 @@ class POPOP:
         self.visual = visual
         self.population = self.initialize_population(patch_size)
         self.fitness_values = np.zeros(self.population_size)
+        self.patch_size = patch_size
     
     def initialize_population(self, patch_size) -> np.ndarray:
         """Khởi tạo quần thể các patch 1D"""
@@ -82,7 +83,6 @@ class POPOP:
                     if not np.array_equal(parent2, parent1):
                         break
 
-                # Lai ghép va đột biến
                 if random.random() < self.crossover_rate:
                     child1, child2 = self.crossover_func(parent1, parent2)
                 else:
@@ -110,7 +110,7 @@ class POPOP:
             if self.visual:
                 best_idx = np.argmax(self.fitness_values)
                 best_patch = self.population[best_idx]
-                best_patch = best_patch.reshape(10, 10, 3)
+                best_patch = best_patch.reshape(self.patch_size, self.patch_size, 3)
                 save_image_with_patch(self.fitness_func.get_img1(), self.fitness_func.get_location(), best_patch, f"patch_attack_result")
         print(f"all_gen: {all_gen}")
         self.fitness_values = self._evaluate_fitness(self.population)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         return flattened_patches
     
     mock = mock_population(patch_size=2, number_of_individuals=6)
-    print(mock.shape)
+    # print(mock.shape)
 
     mock_popop = POPOP(fitness_func=mock_fitness_func,
                   tournament_size=4,

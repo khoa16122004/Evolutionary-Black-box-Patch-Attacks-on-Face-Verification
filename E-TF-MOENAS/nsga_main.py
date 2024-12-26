@@ -50,6 +50,7 @@ def parse_args():
     parser.add_argument('--n_eval', type=int, required=True, help="Số lần đánh giá cho thuật toán")
     parser.add_argument('--pop_size', type=int, required=True, help="Kích thước quần thể")
     parser.add_argument('--patch_size', type=int, default=20, help="Kích thước patch cho PatchFaceAttack")
+    parser.add_argument('--num_of_shapes', type=int, default=2, help="None")
     return parser.parse_args()
 
 
@@ -67,7 +68,6 @@ def popop(args):
         for region in ['left_eye', 'right_eye', 'nose']:
 
             location = get_landmarks(img1_np, mtcnn, region, args.patch_size)
-            print(location)
             prob = PatchFaceAttack(args.n_eval, location, MODEL, img1_np, img2_np, label, args.patch_size)
             sampling = RandomSampling(n_sample=args.pop_size, patch_size=args.patch_size)
             crossover = PointCrossover('SE')
@@ -75,7 +75,7 @@ def popop(args):
             algorithm.set_hyperparameters(pop_size=args.pop_size, 
                                           sampling=sampling,
                                           crossover=crossover,
-                                          mutation=BitStringMutation(args.patch_size),
+                                          mutation=BitStringMutation(args.patch_size, args.num_of_shapes),
                                           survival=RankAndCrowdingSurvival(),
                                           debug=True)
             
@@ -91,7 +91,7 @@ def popop(args):
                 'patch_size': args.patch_size, 
             }
             
-            output_dir = f"nsgaII_neval={args.n_eval}_popsize={args.pop_size}_patchsize={args.patch_size}"
+            output_dir = f"nsgaII_neval={args.n_eval}_popsize={args.pop_size}_patchsize={args.patch_size}_numshape={args.num_of_shapes}"
             output_region_dir= os.path.join(output_dir, region)
             os.makedirs(output_region_dir, exist_ok=True)
 

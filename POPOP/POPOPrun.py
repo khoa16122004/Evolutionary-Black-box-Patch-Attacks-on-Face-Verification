@@ -7,42 +7,44 @@ import cv2
 import numpy as np
 import os
 from .visualization import save_image_with_patch
+from config_recons import *
 
 if __name__ == "__main__":
 
-    # khởi tạo các tham số
-    img1_path = r'D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_crop_margin_5\lfw_crop_margin_5\Abdel_Nasser_Assidi\Abdel_Nasser_Assidi_0001.jpg'
-    img1 = cv2.imread(img1_path)
-    img2_path = r'D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_crop_margin_5\lfw_crop_margin_5\Abdel_Nasser_Assidi\Abdel_Nasser_Assidi_0002.jpg'
-    img2 = cv2.imread(img2_path)
-    model = get_model('restnet_vggface')
-    location = (50, 60, 50, 60)
-    label = 0
-    patch_size = 10
-    population_size = 40 # số cá thể trong quần thể
-    number_of_shapes = 2 # số hình vẽ ngẫu nhiên
-    number_of_generations = 1000 # số thế hệ
+    random.seed(22520691)
+    img1, img2, label = DATA[0]
+    img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
+    img1_np, img2_np = np.array(img1), np.array(img2)    
+
+    location = (50, 70, 50, 70)
+    patch_size = 20
+    population_size = 50 # số cá thể trong quần thể
+    number_of_shapes = 5 # số hình vẽ ngẫu nhiên
+    number_of_generations = 10000 # số thế hệ
 
     # khởi tạo các hàm 
     fitness_func = Fitness(location=location, 
-                           model=model, 
-                           img1=img1, 
-                           img2=img2, 
+                           model=MODEL, 
+                           img1=img1_np, 
+                           img2=img2_np, 
                            label=label, 
                            patch_size=patch_size)
     mutation_func = Mutation(patch_size=patch_size)
+    
     crossover_func = Crossover()
+    
     popop = POPOP(fitness_func=fitness_func, 
                   mutation_func=mutation_func, 
                   crossover_func=crossover_func, 
                   population_size=population_size,
                   patch_size=patch_size,
+                  mutation_rate=0.05,
                   visual=True)
                   
     best_patch, best_fitness = popop.evolve(number_of_generations)
     print(f"Best solution: {best_patch}")
     best_patch = best_patch.reshape(patch_size, patch_size, 3)
-    save_image_with_patch(img1, location, best_patch, "patch_attack_result")    
+    save_image_with_patch(img1_np, location, best_patch, "patch_attack_result")    
 
     print(f"Best fitness: {best_fitness}")
     print(f"fitness: {popop.fitness_values}")

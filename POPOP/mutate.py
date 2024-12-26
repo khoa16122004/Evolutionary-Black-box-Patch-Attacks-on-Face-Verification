@@ -16,17 +16,18 @@ class Mutation:
         image_with_shapes = patch_3d.copy()
         height, width = patch_3d.shape[:2]
 
-        shape_types =  ['rectangle', 'line']
+        shape_types = ['rectangle', 'line', 'circle', 'gaussian_noise', 'color_blending']
 
         for _ in range(number_of_shapes):
             shape_type = random.choice(shape_types)
 
             color = (
-                random.randint(0, 255),
-                random.randint(0, 255),
-                random.randint(0, 255)
+                0.8 * random.randint(0, 255),
+                0.8 * random.randint(0, 255),
+                0.8 * random.randint(0, 255)
             )
-            thickness = random.randint(1, 5)
+                        
+            thickness = 1
 
             if shape_type == 'rectangle':
                 pt1 = (
@@ -40,18 +41,31 @@ class Mutation:
                 cv.rectangle(image_with_shapes, pt1, pt2, color, thickness)
 
 
-            elif shape_type == 'line':
-                pt1 = (
+            elif shape_type == 'circle':
+                center = (
                     random.randint(0, width - 1),
                     random.randint(0, height - 1)
                 )
-                pt2 = (
-                    random.randint(0, width - 1),
-                    random.randint(0, height - 1)
-                )
-                cv.line(image_with_shapes, pt1, pt2, color, thickness)
-        return image_with_shapes
-    
+                radius = random.randint(1, min(height, width) // 4)
+                cv.circle(image_with_shapes, center, radius, color, thickness)
+
+            elif shape_type == 'gaussian_noise': 
+                noise = np.random.normal(0, 5, image_with_shapes.shape).astype(np.uint8)  # Mean=0, Stddev=5
+                image_with_shapes = image_with_shapes + 0.001 * noise
+
+
+            elif shape_type == 'color_blending':
+                blend_color = np.full(image_with_shapes.shape, 
+                                    (random.randint(0, 255), 
+                                    random.randint(0, 255), 
+                                    random.randint(0, 255)), 
+                                    dtype=np.uint8)  
+
+                alpha = random.uniform(0.1, 0.5) 
+                image_with_shapes = (1 - alpha) * image_with_shapes + alpha * blend_color
+            
+        return image_with_shapes.astype(np.uint8)
+        
     def __call__(self, patch, number_of_shapes=2):
         patch_final = self.add_random_shape_to_image(patch, number_of_shapes)
         return patch_final.flatten()

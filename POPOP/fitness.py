@@ -74,10 +74,14 @@ class Fitness:
         adv_scores = - self.evaluate_adv(patchs)
         psnr_scores = - self.evaluate_psnr(patchs)
         return adv_scores, psnr_scores
+        
+        # psnr_scores = self.evaluate_psnr(patchs)
+        # return 0, psnr_scores
+        
     def __call__(self, patches):
         adv, psnr = self.benchmark(patchs=patches)
         return ATTACK_W * adv + RECONS_W * psnr
-
+        # return psnr
 if __name__ == '__main__':
     from get_architech import get_model
     img1_path = r'D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_crop_margin_5\lfw_crop_margin_5\Abdel_Nasser_Assidi\Abdel_Nasser_Assidi_0001.jpg'

@@ -4,9 +4,9 @@ from torchvision import transforms
 import random
 
 MODEL = get_model("restnet_vggface")
-DATA = LFW(IMG_DIR="lfw_dataset/lfw_crop_margin_5",
-           MASK_DIR="lfw_dataset/lfw_lips_mask",
-           PAIR_PATH="lfw_dataset/pairs.txt",
+DATA = LFW(IMG_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_crop_margin_5",
+           MASK_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_lips_mask",
+           PAIR_PATH=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/pairs.txt",
            transform=None)
 
 PATIENCE = 10
@@ -21,8 +21,8 @@ ELITISM_NUMBER = 6
 STARTING_SHAPE_NUMBER = 6
 PRINT_EVERY_GEN = 25
 SAVE_FRAME_FOR_GIF_EVERY = 100
-ATTACK_W = 0.1
-RECONS_W = 0.9
+ATTACK_W = 0.3
+RECONS_W = 0.7
 INTERVAL_ARKIVE = 2
 MIN_IMPROVEMENT = 10
 TARGET_FITNESS = 0.6
