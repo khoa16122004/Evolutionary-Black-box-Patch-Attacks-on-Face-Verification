@@ -8,16 +8,48 @@ import numpy as np
 import os
 from .visualization import save_image_with_patch
 from config_recons import *
+from mtcnn import MTCNN
+
+
+def get_landmarks(img, mtcnn, region, patch_size=20):
+    
+    """
+        Take an list of landmarks
+    """
+    
+    w, h = img.shape[:2]
+    img_np = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+    preds = mtcnn.detect_faces(img_np)
+    if len(preds) > 1:
+        bbs = [item['box'] for item in preds] 
+        bb_indx = take_maximum_area_box(bbs)
+    elif len(preds) == 1:
+        bb_indx = 0
+    elif len(preds) == 0:
+        return None, (None, None)
+    lmks = preds[bb_indx]["keypoints"]
+    
+    lmk = lmks[region]
+
+    half_size = patch_size // 2
+    x_min = max(lmk[0] - half_size, 0)
+    y_min = max(lmk[1] - half_size, 0)
+    x_max = min(lmk[0] + half_size, w)
+    y_max = min(lmk[1] + half_size, h)
+    cv2.rectangle(img_np, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+         
+    return (x_min, x_max, y_min, y_max)
 
 if __name__ == "__main__":
-
+    mtcnn = MTCNN()
     random.seed(22520691)
-    img1, img2, label = DATA[0]
+    img1, img2, label = DATA[100]
     img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
     img1_np, img2_np = np.array(img1), np.array(img2)    
 
-    location = (50, 70, 50, 70)
     patch_size = 20
+    location = get_landmarks(img1_np, mtcnn, 'nose', patch_size=patch_size)
+    
     population_size = 50 # số cá thể trong quần thể
     number_of_shapes = 5 # số hình vẽ ngẫu nhiên
     number_of_generations = 1000 # số thế hệ
@@ -31,7 +63,7 @@ if __name__ == "__main__":
                            patch_size=patch_size)
     mutation_func = Mutation(patch_size=patch_size)
     
-    crossover_func = Crossover()
+    crossover_func = Crossover('CM')
     
     popop = POPOP(fitness_func=fitness_func, 
                   mutation_func=mutation_func, 

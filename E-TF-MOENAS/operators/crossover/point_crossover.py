@@ -33,15 +33,22 @@ def crossover(parent_1, parent_2, typeC, **kwargs):
         offspring_1[pts], offspring_2[pts] = offspring_2[pts], offspring_1[pts].copy()
     
     elif typeC == 'SE': 
-            segment_start = np.random.randint(0, len(parent_1) - 1)
-            segment_length = np.random.randint(1, len(parent_1) - segment_start)
-            segment_end = segment_start + segment_length
+        for _ in range(2):
+            # Chọn đoạn ngẫu nhiên cho mỗi cha
+            segment_start_1 = np.random.randint(0, len(parent_1) - 1)
+            segment_length_1 = np.random.randint(1, len(parent_1) - segment_start_1)
+            segment_end_1 = segment_start_1 + segment_length_1
 
-            offspring_1[segment_start:segment_end], offspring_2[segment_start:segment_end] = \
-                offspring_2[segment_start:segment_end], offspring_1[segment_start:segment_end].copy()
+            segment_start_2 = np.random.randint(0, len(parent_2) - 1)
+            segment_length_2 = np.random.randint(1, len(parent_2) - segment_start_2)
+            segment_end_2 = segment_start_2 + segment_length_2
+
+            offspring_1[segment_start_1:segment_end_1], offspring_2[segment_start_2:segment_end_2] = \
+                offspring_2[segment_start_2:segment_end_2], offspring_1[segment_start_1:segment_end_1].copy()
+
+    return offspring_1, offspring_2
 
     
-    return [offspring_1, offspring_2]
 
 
 class PointCrossover(Crossover):
