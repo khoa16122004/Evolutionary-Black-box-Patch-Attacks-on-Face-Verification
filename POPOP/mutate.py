@@ -40,7 +40,7 @@ class Mutation:
 
             elif shape_type == 'gaussian_noise': 
                 noise = np.random.normal(0, 5, image_with_shapes.shape).astype(np.uint8)  # Mean=0, Stddev=5
-                image_with_shapes = image_with_shapes + 0.001 * noise
+                image_with_shapes = image_with_shapes + 0.01 * noise
 
 
             elif shape_type == 'color_blending':

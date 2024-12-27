@@ -38,16 +38,16 @@ def get_landmarks(img, mtcnn, region, patch_size=20):
     y_max = min(lmk[1] + half_size, h)
     cv2.rectangle(img_np, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
          
-    return (x_min, x_max, y_min, y_max)
+    return (y_min, y_max, x_min, x_max)
 
 if __name__ == "__main__":
     mtcnn = MTCNN()
     random.seed(22520691)
-    img1, img2, label = DATA[100]
+    img1, img2, label = DATA[20]
     img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
     img1_np, img2_np = np.array(img1), np.array(img2)    
 
-    patch_size = 20
+    patch_size = 10
     location = get_landmarks(img1_np, mtcnn, 'nose', patch_size=patch_size)
     
     population_size = 50 # số cá thể trong quần thể

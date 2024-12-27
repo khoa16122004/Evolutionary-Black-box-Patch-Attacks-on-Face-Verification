@@ -40,9 +40,9 @@ def get_landmarks(img, mtcnn, region, patch_size=20):
     y_min = max(lmk[1] - half_size, 0)
     x_max = min(lmk[0] + half_size, w)
     y_max = min(lmk[1] + half_size, h)
-    cv2.rectangle(img_np, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
+    cv2.rectangle(img_np, (x_max, y_max),(x_min, y_min), (255, 0, 0), 2)
          
-    return (x_min, x_max, y_min, y_max)
+    return ( y_min, y_max, x_min, x_max,)
            
                 
 def parse_args():
