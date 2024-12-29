@@ -34,7 +34,6 @@ def crossover(parent_1, parent_2, typeC, **kwargs):
     
     elif typeC == 'SE': 
         for _ in range(2):
-            # Chọn đoạn ngẫu nhiên cho mỗi cha
             segment_start_1 = np.random.randint(0, len(parent_1) - 1)
             segment_length_1 = np.random.randint(1, len(parent_1) - segment_start_1)
             segment_end_1 = segment_start_1 + segment_length_1
@@ -45,6 +44,20 @@ def crossover(parent_1, parent_2, typeC, **kwargs):
 
             offspring_1[segment_start_1:segment_end_1], offspring_2[segment_start_2:segment_end_2] = \
                 offspring_2[segment_start_2:segment_end_2], offspring_1[segment_start_1:segment_end_1].copy()
+
+    elif typeC == "Random_SE":
+        n_segments = np.random.randint(2, 6)
+        
+        cut_points = sorted(np.random.choice(range(1, len(parent_1)), n_segments-1, replace=False))
+        cut_points = [0] + list(cut_points) + [len(parent_1)]
+        
+        for i in range(len(cut_points) - 1):
+            if np.random.random() < 0.5:  # 50% cơ hội swap
+                start = cut_points[i]
+                end = cut_points[i+1]
+                offspring_1[start:end], offspring_2[start:end] = \
+                    offspring_2[start:end].copy(), offspring_1[start:end].copy()
+  
 
     return offspring_1, offspring_2
 

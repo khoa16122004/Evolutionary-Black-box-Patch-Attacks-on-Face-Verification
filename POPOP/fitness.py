@@ -75,20 +75,19 @@ class Fitness:
         
     def benchmark(self, patchs):
         adv_scores = self.evaluate_adv(patchs)
-        psnr_scores = self.evaluate_psnr(patchs)
+        # psnr_scores = self.evaluate_psnr(patchs)
         print("Adv scores: ", adv_scores.max())
-        return adv_scores, psnr_scores
-        
-        psnr_scores = self.evaluate_psnr(patchs)
-        return 0, psnr_scores
+        return adv_scores, 0
+        # return adv_scores, psnr_scores
+
+        # psnr_scores = self.evaluate_psnr(patchs)
+        # return 0, psnr_scores
         
     def __call__(self, patches):
         adv, psnr = self.benchmark(patchs=patches)
         # print("ADV: ", adv.max())
         # print("PSNR: ", psnr.max())
         fitness = ATTACK_W * adv + RECONS_W * psnr
-        
-        print(fitness.max())
         return fitness
         # return psnr
 if __name__ == '__main__':

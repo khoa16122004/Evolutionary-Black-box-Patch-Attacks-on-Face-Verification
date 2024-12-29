@@ -27,7 +27,7 @@ INTERVAL_ARKIVE = 2
 MIN_IMPROVEMENT = 10
 TARGET_FITNESS = 0.6
 
-BOX_SIZE = 15
+BOX_SIZE = 30
 
 PRECOMPUTED_COLORS = [(random.randint(0,255), random.randint(0,255), random.randint(0,255)) 
                       for _ in range(1000)]

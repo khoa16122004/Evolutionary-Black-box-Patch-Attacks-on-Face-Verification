@@ -70,7 +70,7 @@ def popop(args):
             location = get_landmarks(img1_np, mtcnn, region, args.patch_size)
             prob = PatchFaceAttack(args.n_eval, location, MODEL, img1_np, img2_np, label, args.patch_size)
             sampling = RandomSampling(n_sample=args.pop_size, patch_size=args.patch_size)
-            crossover = PointCrossover('SE')
+            crossover = PointCrossover('SE', args.patch_size)
             algorithm = NSGAII()
             algorithm.set_hyperparameters(pop_size=args.pop_size, 
                                           sampling=sampling,

@@ -15,15 +15,10 @@ class NSGAII(Algorithm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Default: f0 -> efficiency metric; f1 -> performance metric
         self.f0, self.f1 = None, None
         self.individual = Individual(rank=INF, crowding=-1)
 
     def _setup(self):
-        # attr_perf_metric = self.f1.split('_')
-        # self.subset = attr_perf_metric[0]
-        # self.perf_metric = attr_perf_metric[1]
-        # self.epoch = int(attr_perf_metric[-1])
         pass
 
     def _evaluate(self, pop):
@@ -101,7 +96,6 @@ class NSGAII(Algorithm):
 
         elitist_archive_search = {
             'X': self.E_Archive_search.X.copy(),
-            # 'hashKey': self.E_Archive_search.hashKey.copy(),
             'F': self.E_Archive_search.F.copy(),
         }
         self.E_Archive_search_history.append(elitist_archive_search)

@@ -409,7 +409,7 @@ if __name__ == "__main__":
         # init pareto arkive
         arkive = []
         
-        for location in ['left_eye', 'right_eye', 'nose']:
+        for location in ['nose', 'left_eye', 'right_eye']:
             img1, img2, label = DATA[i]
             img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
@@ -420,35 +420,39 @@ if __name__ == "__main__":
             original_patch = take_patch_from_image(img1, original_location)
             
             # evolutionary pipeline
-            out_patch, arkive = whole_pipeline(arkive, original_patch, img1, img2, label, 
-                                    original_location, original_height, 
-                                    original_width, i)
+            # out_patch, arkive = whole_pipeline(arkive, original_patch, img1, img2, label, 
+            #                         original_location, original_height, 
+            #                         original_width, i)
 
 
 
-            print(f"\nProcessing pair {i+1}/{len(DATA)}")
+            # print(f"\nProcessing pair {i+1}/{len(DATA)}")
 
-        #     output_adv = apply_patch_to_image(out_patch, img1, original_location)
+            output_adv = apply_patch_to_image(Image.new("RGB", (original_height, original_width), (0,0,0)),
+                                              img1, original_location)
             
-        #     img1_adv = transforms.ToTensor()(output_adv).cuda()
-        #     img2 = transforms.ToTensor()(img2).cuda()
-        #     img1 = transforms.ToTensor()(img1).cuda()
+            img1_adv = transforms.ToTensor()(output_adv).cuda()
+            img1_adv = torch.zeros_like(transforms.ToTensor()(img1)).cuda()
+            img2 = transforms.ToTensor()(img2).cuda()
+            img1 = transforms.ToTensor()(img1).cuda()
             
-        #     adv_fea = MODEL(img1_adv.unsqueeze(0))
-        #     img2_fea = MODEL(img2.unsqueeze(0))
-        #     img1_fea = MODEL(img1.unsqueeze(0))
+            adv_fea = MODEL(img1_adv.unsqueeze(0))
+            img2_fea = MODEL(img2.unsqueeze(0))
+            img1_fea = MODEL(img1.unsqueeze(0))
             
-        #     sim = F.cosine_similarity(adv_fea, img2_fea).item()
-        #     sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
+            sim = F.cosine_similarity(adv_fea, img2_fea).item()
+            sim_0 = F.cosine_similarity(img1_fea, img2_fea).item()
             
-        # output_path = os.path.join(output_dir, f"adv_{i}_{sim}_{sim_0}_{label}.png")
-        # output_adv.save(output_path)
+            print(sim_0, sim)
+            # break
+        output_path = os.path.join(f"black_asign.png")
+        output_adv.save(output_path)
         
         output_arkiv_path = os.path.join(output_dir, f'arkiv_{i}.pkl')
         
         with open(output_arkiv_path, "wb") as f:
             pkl.dump(arkive, f)
-
+        break
 
 
 # tấn công nhiều vùng, thêm(x,y)

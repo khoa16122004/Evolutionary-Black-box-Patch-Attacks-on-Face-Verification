@@ -42,17 +42,19 @@ def get_landmarks(img, mtcnn, region, patch_size=20):
 
 if __name__ == "__main__":
     mtcnn = MTCNN()
-    random.seed(22520691)
-    img1, img2, label = DATA[20]
+    random.seed(22520692)
+    img1, img2, label = DATA[1]
     img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
+    img2.save("img2.png")
     img1_np, img2_np = np.array(img1), np.array(img2)    
 
-    patch_size = 10
+    patch_size = 20
     location = get_landmarks(img1_np, mtcnn, 'nose', patch_size=patch_size)
+    location = (10, 30, 11, 31)
     
     population_size = 50 # số cá thể trong quần thể
-    number_of_shapes = 5 # số hình vẽ ngẫu nhiên
-    number_of_generations = 1000 # số thế hệ
+    number_of_shapes = 2 # số hình vẽ ngẫu nhiên
+    number_of_generations = 10000 # số thế hệ
 
     # khởi tạo các hàm 
     fitness_func = Fitness(location=location, 
@@ -63,14 +65,14 @@ if __name__ == "__main__":
                            patch_size=patch_size)
     mutation_func = Mutation(patch_size=patch_size)
     
-    crossover_func = Crossover('CM')
+    crossover_func = Crossover('Random_SE', patch_size)
     
     popop = POPOP(fitness_func=fitness_func, 
                   mutation_func=mutation_func, 
                   crossover_func=crossover_func, 
                   population_size=population_size,
                   patch_size=patch_size,
-                  mutation_rate=0.05,
+                  mutation_rate=0.5,
                   visual=True)
                   
     best_patch, best_fitness = popop.evolve(number_of_generations)
@@ -80,3 +82,4 @@ if __name__ == "__main__":
 
     print(f"Best fitness: {best_fitness}")
     print(f"fitness: {popop.fitness_values}")
+    
