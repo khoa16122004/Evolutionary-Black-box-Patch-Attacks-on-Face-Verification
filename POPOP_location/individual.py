@@ -1,5 +1,6 @@
 import random
 import torch
+from torchvision.utils import save_image
 
 class Individual:
     def __init__(self, patch_size: int, img_shape: tuple[int, int], prob_mutate_patch: float, prob_mutate_location: float) -> None:
@@ -41,7 +42,19 @@ class Individual:
         if random.random() < self.prob_mutate_location:
             self._random_location()
  
- 
+    def mutate_location(self) -> None:
+        """
+        Apply a mutation location to the individual
+        """
+
+        self._random_location()
+    
+    def mutate_content(self) -> None:
+        """
+        Apply a mutation to the individual: add a rectangle or circle shape to the patch.
+        """
+        if random.random() < self.prob_mutate_patch:  
+            self._add_rectangle()
     
     def _add_rectangle(self) -> None:
         """
@@ -63,7 +76,7 @@ class Individual:
         :return: Two new Individual objects.
         """
         offstring1_patch = self.patch.clone()
-        offstring2_patch = self.patch.clone()
+        offstring2_patch = parent2.patch.clone()
 
         offstring1 = Individual(self.patch_size, self.img_shape, self.prob_mutate_patch, self.prob_mutate_location)
         offstring2 = Individual(self.patch_size, self.img_shape, self.prob_mutate_patch, self.prob_mutate_location)
@@ -72,9 +85,9 @@ class Individual:
         offstring1_patch[:, :cut_point, :] = parent2.patch[:, :cut_point, :]
         offstring2_patch[:, :cut_point, :] = self.patch[:, :cut_point, :]
 
-        if random.random() < 0.05:
-            offstring1.location = parent2.location
-            offstring2.location = self.location 
+        # if random.random() < 0.05:
+        #     offstring1.location = parent2.location
+        #     offstring2.location = self.location 
       
         offstring1.patch = offstring1_patch
         offstring2.patch = offstring2_patch

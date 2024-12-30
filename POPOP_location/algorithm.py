@@ -4,22 +4,28 @@ from individual import Individual
 import torch
 import random
 from torchvision.utils import save_image
-
+from tqdm import tqdm
 
 class GA:
     def __init__(self, n_iter: int, 
                  population: 'Population', 
                  fitness: 'Fitness',
-                 tourament_size: int, ):
+                 tourament_size: int, 
+                 interval_update: int):
         self.n_iter = n_iter
         self.pop = population
         self.args = self.pop.get_params
         self.tourament_size = tourament_size
         self.fitness = fitness
+        self.interval_update = interval_update
         
     def solve(self):
+        """
+        Parallel update the location and content of individuals
+        """
+        
         P = self.pop.P
-        for i in range(self.n_iter):  
+        for i in tqdm(range(self.n_iter)):  
             O_P = [] # list['individual']
             for j in range(self.pop.pop_size // 2):
                 parent1, parent2 = random.sample(self.pop.P, 2)                
@@ -35,14 +41,55 @@ class GA:
             random.shuffle(O_P)
             P = self.tourament_selection(O_P)
             self.pop.P = P
+            # self.save_best(P)
+            
+            if self.has_converged(P):
+                print(f"Convergence reached at iteration {i+1}. Terminating early.")
+                break
+            
+            
+        adv_img, adv_score, pnsr_score= self.save_best(self.pop.P)
+   
+        return adv_img, adv_score, pnsr_score   
+
+    def solve_sequential(self):
+        """
+        Sequential update the location and content of individuals
+        """
+        self.prob_mutate_location = 0.0 # mutate for random_location 
+        P = self.pop.P
+        
+        for i in tqdm(range(self.n_iter)):  
+            O_P = [] # list['individual']
+            for j in range(self.pop.pop_size // 2):
+                parent1, parent2 = random.sample(self.pop.P, 2)                
+                offstring_1, offstring_2 = parent1.crossover(parent2)
+                
+                if i % self.interval_update == 0:
+                    print("Mutate location")
+                    offstring_1.mutate_location()
+                    offstring_2.mutate_location()
+                else:
+                    offstring_1.mutate_content()
+                    offstring_2.mutate_content()
+                
+                O_P.append(offstring_1)
+                O_P.append(offstring_2)
+
+            O_P.extend(self.pop.P)
+            random.shuffle(O_P)
+            P = self.tourament_selection(O_P)
+            self.pop.P = P
             self.save_best(P)
             
             if self.has_converged(P):
                 print(f"Convergence reached at iteration {i+1}. Terminating early.")
                 break
             
-        return self.pop            
-    
+        adv_img, adv_score, pnsr_score= self.save_best(self.pop.P)
+   
+        return adv_img, adv_score, pnsr_score  
+   
     
     def has_converged(self, population: list['Individual']) -> bool:
         """
@@ -71,9 +118,13 @@ class GA:
         best_patch = P[best_idx]
         best_adv_img = self.fitness.apply_patch_to_image(best_patch.patch, best_patch.location)
         
-        print("Best_adv: ", adv_scores[best_idx])
-        save_image(best_adv_img, 'process.png')
+        # print("Best_adv: ", adv_scores[best_idx])
+        # save_image(best_adv_img, 'process.png')
+        return best_adv_img ,adv_scores[best_idx].item(), psnr_scores[best_idx].item()
+        
                 
                 
 
-        
+
+
+                
