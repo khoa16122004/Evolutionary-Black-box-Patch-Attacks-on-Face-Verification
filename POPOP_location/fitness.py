@@ -31,20 +31,23 @@ class Fitness:
             adv_features = self.model(adv_batch)
             sims = F.cosine_similarity(adv_features, self.img2_feature, dim=1)
             adv_scores = (1 - self.label) * (0.5 - sims) + self.label * (sims - 0.5)
+            
+            adv_scores = torch.where(adv_scores > 0, torch.tensor(0.0, device=adv_scores.device), adv_scores)
+            
             return adv_scores
             
     def evaluate_psnr(self, P: list['Individual']) -> torch.Tensor:
         adv_imgs = torch.stack([self.apply_patch_to_image(ind.patch, ind.location) for ind in P])
         mse = F.mse_loss(adv_imgs, self.img1.expand_as(adv_imgs), reduction='none')
         mse = mse.view(mse.size(0), -1).mean(dim=1) 
-        psnr_scores = 10 * torch.log10(1 / (mse + 1e-8))
+        psnr_scores = torch.log10(1 / (mse + 1e-8))
         
-        return psnr_scores
+        return psnr_scores / 10
     
     def benchmark(self, P: list['Individual']) -> torch.Tensor:
         adv_scores = self.evaluate_adv(P)
         psnr_scores = self.evaluate_psnr(P)
-        # return adv_scores, adv_scores, 0
+
         return adv_scores * self.attack_w + psnr_scores * self.recons_w, adv_scores, psnr_scores
         
         

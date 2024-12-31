@@ -11,7 +11,8 @@ class Individual:
         self.img_shape = img_shape
         self.prob_mutate_patch = prob_mutate_patch
         self.prob_mutate_location = prob_mutate_location
-        
+        self.rank = None
+        self.crowding = None
         
         self._random_location()
         self._random_patch()
@@ -68,7 +69,7 @@ class Individual:
         self.patch[:, x_min: x_min + width, y_min: y_min + width] = color.unsqueeze(1).unsqueeze(2)
     
 
-    def crossover(self, parent2: 'Individual') -> tuple['Individual', 'Individual']:
+    def crossover_UX(self, parent2: 'Individual') -> tuple['Individual', 'Individual']:
         """
         Perform crossover with another individual to produce two offspring.
 
@@ -85,12 +86,34 @@ class Individual:
         offstring1_patch[:, :cut_point, :] = parent2.patch[:, :cut_point, :]
         offstring2_patch[:, :cut_point, :] = self.patch[:, :cut_point, :]
 
-        # if random.random() < 0.05:
-        #     offstring1.location = parent2.location
-        #     offstring2.location = self.location 
+        if random.random() < 0.05:
+            offstring1.location = parent2.location
+            offstring2.location = self.location 
       
         offstring1.patch = offstring1_patch
         offstring2.patch = offstring2_patch
 
         return offstring1, offstring2
+    
+    def crossover_blended(self, parent2: 'Individual', alpha=0.5) -> tuple['Individual', 'Individual']:
+        """
+        using crossover_blended
+        o1 = alpha * p1 + (1 - alpha) * p2
+        o2 = alpha *p2 + (1 - alpha) * p1
+        """    
+        offstring1_patch = alpha * self.patch + (1 - alpha) * parent2.patch
+        offstring2_patch = alpha * parent2.patch + (1 - alpha) * self.patch
+
+        offstring1 = Individual(self.patch_size, self.img_shape, self.prob_mutate_patch, self.prob_mutate_location)
+        offstring2 = Individual(self.patch_size, self.img_shape, self.prob_mutate_patch, self.prob_mutate_location)
+
+        if random.random() < 0.05:
+            offstring1.location = parent2.location
+            offstring2.location = self.location
+        
+        offstring1.patch = offstring1_patch
+        offstring2.patch = offstring2_patch
+
+        return offstring1, offstring2
+        
         

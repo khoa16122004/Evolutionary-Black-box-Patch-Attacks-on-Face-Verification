@@ -1,7 +1,7 @@
 import argparse
 from population import Population
 from individual import Individual
-from algorithm import GA
+from algorithm import GA, NSGAII
 from fitness import Fitness
 from get_architech import get_model
 from dataset import LFW
@@ -23,9 +23,9 @@ def parse_args():
     parser.add_argument('--tourament_size', type=int, default=3, help="Tournament size for selection")
     parser.add_argument('--recons_w', type=float, default=0.5)
     parser.add_argument('--attack_w', type=float, default=0.5)
-    parser.add_argument('--baseline', type=str, default='GA', choices=['GA', 'GA_sequence'])
+    parser.add_argument('--baseline', type=str, default='GA', choices=['GA', 'GA_sequence', 'NSGAII'])
     parser.add_argument('--update_location_iterval', type=int, default=200)
-#     parser.add_argument('--output_dir', type=str)
+    parser.add_argument('--crossover_type', type=str, choices=['UX', 'Blended'])
     
     return parser.parse_args()
 
@@ -50,11 +50,11 @@ if __name__ == "__main__":
     results = []
     
     for i in range(len(DATA)):
-        if i == 1000:
+        if i == 20:
             break
         
         random.seed(22520691)
-        img1, img2, label = DATA[1]
+        img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         
         img1_torch, img2_torch = toTensor(img1), toTensor(img2)
@@ -72,33 +72,47 @@ if __name__ == "__main__":
                         recons_w=args.recons_w,
                         attack_w=args.attack_w)
         
-        ga = GA(n_iter=args.n_iter,
-                population=population,
-                fitness=fitness,
-                tourament_size=args.tourament_size,
-                interval_update=args.update_location_iterval)
+        if args.baseline == "GA":
+            algo = GA(n_iter=args.n_iter,
+                    population=population,
+                    fitness=fitness,
+                    tourament_size=args.tourament_size,
+                    interval_update=args.update_location_iterval,
+                    crossover_type=args.crossover_type)
         
-        print("args.baseline")
+        elif args.baseline == "NSGAII":
+            algo = NSGAII(n_iter=args.n_iter,
+                        population=population,
+                        fitness=fitness,
+                        tourament_size=args.tourament_size,
+                        interval_update=args.update_location_iterval,
+                        crossover_type=args.crossover_type)
+        
         if args.baseline == 'GA_sequence':
-                adv_img, adv_score, pnsr_score = ga.solve_sequential()
+                P, adv_img, adv_score, pnsr_score = algo.solve_sequential()
         elif args.baseline == 'GA':
                 print("Using GA")
-                adv_img, adv_score, pnsr_score = ga.solve()
+                P, adv_img, adv_score, pnsr_score = algo.solve()
 
+        elif args.baseline == "NSGAII":
+                P, adv_img, adv_score, pnsr_score = algo.solve()
+        
+        
         # save_image
         print("Adv img", adv_img.shape)
         save_image(adv_img, os.path.join(output_img_dir, f"{i}.png"))
         results.append({
+            "Population": P,
             "adv_img": adv_img,
             "adv_score": adv_score,
             "pnsr_score": pnsr_score})
         
-        
+        print("Adv score: ", adv_score)
         if adv_score > 0:
                 success_rate += 1
-    
+        # break
     output_pickle = os.path.join(output_dir, 'result.pkl')            
     with open(output_pickle, 'wb') as f:
             pkl.dump(results, f)
                         
-    print(f"Success rate: {success_rate / len(DATA)}")
+    print(f"Success rate: {success_rate / 20}")
