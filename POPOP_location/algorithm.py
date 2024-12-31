@@ -34,9 +34,9 @@ class GA:
             O_P = [] # list['individual']
             for j in range(self.pop.pop_size // 2):
                 parent1, parent2 = random.sample(self.pop.P, 2)  
-                if self.cross_type == 'blended':              
+                if self.crossover_type == 'Blended':              
                     offstring_1, offstring_2 = parent1.crossover_blended(parent2)
-                elif self.cross_type == 'UX':
+                elif self.crossover_type == 'UX':
                     offstring_1, offstring_2 = parent1.crossover_UX(parent2)
                 
                 offstring_1.mutate()
