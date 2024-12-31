@@ -32,7 +32,7 @@ class Fitness:
             sims = F.cosine_similarity(adv_features, self.img2_feature, dim=1)
             adv_scores = (1 - self.label) * (0.5 - sims) + self.label * (sims - 0.5)
             
-            adv_scores = torch.where(adv_scores > 0, torch.tensor(0.0, device=adv_scores.device), adv_scores)
+            # adv_scores = torch.where(adv_scores > 0, torch.tensor(0.0, device=adv_scores.device), adv_scores)
             
             return adv_scores
             

@@ -36,7 +36,9 @@ if __name__ == "__main__":
     # save
     output_dir = f"{args.baseline}_niter={args.n_iter}_reconsw={args.recons_w}_attackw={args.attack_w}_popsize={args.pop_size}_toursize={args.tourament_size}_patchsize={args.pop_size}_problocationmutate={args.prob_mutate_location}_probpatchmutate={args.prob_mutate_patch}_"
     output_img_dir = os.path.join(output_dir, "img")
+    output_pickle_dir = os.path.join(output_dir, "pickle")
     os.makedirs(output_img_dir, exist_ok=True)
+    os.makedirs(output_pickle_dir, exist_ok=True)
     
     MODEL = get_model("restnet_vggface")
     DATA = LFW(IMG_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_crop_margin_5",
@@ -99,20 +101,27 @@ if __name__ == "__main__":
         
         
         # save_image
-        print("Adv img", adv_img.shape)
         save_image(adv_img, os.path.join(output_img_dir, f"{i}.png"))
-        results.append({
-            "Population": P,
-            "adv_img": adv_img,
-            "adv_score": adv_score,
-            "pnsr_score": pnsr_score})
+        # results.append({
+        #     "Population": P,
+        #     "adv_img": adv_img,
+        #     "adv_score": adv_score,
+        #     "pnsr_score": pnsr_score})
+        
+        result = {
+                "Population": P,
+                "adv_img": adv_img,
+                "adv_score": adv_score,
+                "pnsr_score": pnsr_score
+                }
         
         print("Adv score: ", adv_score)
         if adv_score > 0:
                 success_rate += 1
         # break
-    output_pickle = os.path.join(output_dir, 'result.pkl')            
-    with open(output_pickle, 'wb') as f:
-            pkl.dump(results, f)
+        output_pickle = os.path.join(output_pickle_dir, f'{i}.pkl')            
+
+        with open(output_pickle, 'wb') as f:
+                pkl.dump(result, f)
                         
     print(f"Success rate: {success_rate / 20}")
