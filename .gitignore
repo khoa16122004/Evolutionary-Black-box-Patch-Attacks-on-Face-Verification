@@ -2,7 +2,7 @@ lfw_dataset/*
 test_populational/*
 test*
 new*
-pretrained_model/*
+*pretrained_model
 *.png
 # *.jpg
 *.gif

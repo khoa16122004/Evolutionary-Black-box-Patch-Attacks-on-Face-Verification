@@ -52,8 +52,8 @@ if __name__ == "__main__":
     results = []
     
     for i in range(len(DATA)):
-        if i == 20:
-            break
+        # if i == 20:
+        #     break
         
         random.seed(22520691)
         img1, img2, label = DATA[i]
