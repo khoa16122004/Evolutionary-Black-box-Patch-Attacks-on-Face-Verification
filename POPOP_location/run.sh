@@ -7,7 +7,7 @@ python main.py --pop_size 40 --patch_size 10 --prob_mutate_location 0.3 --prob_m
 - SSR: 
 - PSNR: 
 # 0.7recons - 0.3adv: 
-- SSR: 
+- SSR: 73/100
 - PSNR: 
 # 0.5recons - 0.5adv: 
 - SSR: 
@@ -30,7 +30,7 @@ python main.py --pop_size 40 --patch_size 10 --prob_mutate_location 0.3 --prob_m
 - SSR: 
 - PSNR: 
 # 0.7recons - 0.3adv:
-- SSR: 73/100
+- SSR:
 - PSNR: 
 # 0.5recons - 0.5adv: 
 - SSR: 

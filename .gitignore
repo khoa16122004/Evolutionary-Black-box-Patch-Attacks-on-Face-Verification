@@ -3,8 +3,9 @@ test_populational/*
 test*
 new*
 *pretrained_model
-*.png
+# *.png
 # *.jpg
 *.gif
 *.txt
 *.pt
+*.pkl
