@@ -25,7 +25,6 @@ class FaceVerification:
         self.unormalize = unormalize
     
     def cosine_similarity(self, vec1, vec2):
-        # Chuyển numpy arrays sang tensors trên device
         vec1_tensor = torch.from_numpy(vec1).to(self.device)
         vec2_tensor = torch.from_numpy(vec2).to(self.device)
         return F.cosine_similarity(vec1_tensor, vec2_tensor, dim=0).cpu().numpy()
