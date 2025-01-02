@@ -1,0 +1,1 @@
+PRETRAINED_MODEL_PATH = 'D:\codePJ\RESEARCH\GECCO2025\pretrained_model'
