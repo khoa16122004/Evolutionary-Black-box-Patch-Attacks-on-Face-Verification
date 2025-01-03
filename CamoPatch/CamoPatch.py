@@ -62,7 +62,6 @@ def render(x, w, device='cuda'):
 
 
 def mutate(soln, mut, device='cuda'):
-    # Convert solution to CUDA tensor
     soln_cuda = torch.from_numpy(soln).to(device) if isinstance(soln, np.ndarray) else soln.to(device)
     new_specie = soln_cuda.clone()
 
@@ -127,7 +126,7 @@ class Attack:
             "loc": loc,
             "patch": patch,
             "patch_width": int(math.ceil(self.params["eps"] ** .5)),
-            "final_prediction": loss_function.get_pred(x_adv, self.params["x2"])[0],
+            "final_prediction": loss_function(x_adv, self.params["x2"])[0],
             "process": self.process
         }
         data_final = {
@@ -184,7 +183,7 @@ class Attack:
 
         for it in tqdm(range(1, n_queries)):
             patch_counter += 1
-
+            # self.save_image(np.array(x_adv.cpu().numpy()), r"D:\codePJ\RESEARCH\GECCO2025\CamoPatch\results\result_image_False.png")
             if patch_counter < update_loc_period:
                 patch_new_geno = mutate(patch_geno, self.params["mut"])
                 patch_new = render(patch_new_geno, s, device=self.device)
@@ -208,7 +207,7 @@ class Attack:
                         x_adv = x_adv_new
                         l2_curr = l2_new
                 else:
-                    if loss_new < loss:
+                    if loss_new > loss:
                         loss = loss_new
                         adversarial = adversarial_new
                         patch = patch_new
@@ -243,7 +242,7 @@ class Attack:
                     curr_temp = self.params["temp"] / (it + 1)
                     metropolis = math.exp(-diff / curr_temp)
 
-                    if loss_new < loss or torch.rand(1).item() < metropolis:
+                    if loss_new > loss or torch.rand(1).item() < metropolis:
                         loss = loss_new
                         adversarial = adversarial_new
                         loc = loc_new

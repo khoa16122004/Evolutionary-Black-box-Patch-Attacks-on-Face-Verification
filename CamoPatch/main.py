@@ -7,7 +7,10 @@ from time import time
 from get_architech import get_model
 from torchvision import transforms
 from PIL import *
+import torch
+import random
 
+random.seed(42)
 
 def pytorch_switch(tensor_image):
     return tensor_image.permute(1, 2, 0)
@@ -17,7 +20,7 @@ from CamoPatch import Attack
 if __name__ == "__main__":
 
     load_image = transforms.Compose([
-        transforms.Resize((224,224)),
+        transforms.Resize((160,160)),
         # transforms.CenterCrop(224),
         transforms.ToTensor()
     ])
@@ -25,11 +28,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # parser.add_argument("--model", help="0 or 1", type=int, default=0)
     parser.add_argument("--model_name", type=str, help="resnet_vggface / resnet_webface / estnet_vggface_student", default="resnet_vggface")
-    parser.add_argument("--N", help='Population size', type=int, default=10)
+    parser.add_argument("--N", help='Population size', type=int, default=80)
     parser.add_argument("--temp", type=float, default=300.)
-    parser.add_argument("--mut", help="Mutation prob" ,type=float, default=0.1)
-    parser.add_argument("--s", help="Patch size", type=int, default=16)
-    parser.add_argument("--queries", help="Number of generations", type=int, default=10000)
+    parser.add_argument("--mut", help="Mutation prob" ,type=float, default=0.3)
+    parser.add_argument("--s", help="Patch size", type=int, default=20)
+    parser.add_argument("--queries", help="Number of generations", type=int, default=20000)
     parser.add_argument("--li", help="Update location period", type=int, default=4)
 
     parser.add_argument("--image1_dir", type=str, help="Image1 File directory - image which we will attack")

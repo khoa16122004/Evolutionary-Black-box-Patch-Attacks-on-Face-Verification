@@ -32,7 +32,7 @@ class FaceVerification:
     def get_predict(self, pred, threshold=0.5):
         if isinstance(pred, torch.Tensor):
             pred = pred.cpu().item()
-        if (pred >= threshold):
+        if (pred <= threshold):
             return 0
         return 1
 
@@ -55,17 +55,18 @@ class FaceVerification:
         preds2 = self.model(img2_)
         sims = self.calculate_similarity(preds1, preds2)
         y = self.get_predict(sims)
-    
-        return y, sims, 1-sims
+        
+        return sims
 
     def __call__(self, img1, img2):
-        y, sims, not_sims = self.get_pred(img1, img2)
-        is_adversarial = True if y != self.true else False
+        sims  = self.get_pred(img1, img2)
+        # is_adversarial = True if y != self.true else False
         
         if isinstance(sims, torch.Tensor):
             adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
             adv_scores = float(adv_scores.cpu().item())
         else:
             adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
-
+        is_adversarial = True if adv_scores > 0 else False
+        # print(adv_scores, is_adversarial, sep='\n')
         return [is_adversarial, adv_scores]

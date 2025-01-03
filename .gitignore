@@ -10,3 +10,4 @@ new*
 *.pt
 *.pkl
 *.json
+*/results/*
