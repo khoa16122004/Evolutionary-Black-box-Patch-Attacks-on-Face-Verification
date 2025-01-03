@@ -26,7 +26,8 @@ def parse_args():
     parser.add_argument('--baseline', type=str, default='GA', choices=['GA', 'GA_sequence', 'NSGAII'])
     parser.add_argument('--update_location_iterval', type=int, default=200)
     parser.add_argument('--crossover_type', type=str, choices=['UX', 'Blended'])
-    
+    parser.add_argument('--fitness_type', type=str, choices=['normal', 'adaptive'])
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -34,16 +35,16 @@ if __name__ == "__main__":
     args = parse_args()
     
     # save
-    output_dir = f"{args.baseline}_niter={args.n_iter}_reconsw={args.recons_w}_attackw={args.attack_w}_popsize={args.pop_size}_toursize={args.tourament_size}_patchsize={args.pop_size}_problocationmutate={args.prob_mutate_location}_probpatchmutate={args.prob_mutate_patch}_"
+    output_dir = f"{args.baseline}_niter={args.n_iter}_reconsw={args.recons_w}_attackw={args.attack_w}_popsize={args.pop_size}_toursize={args.tourament_size}_patchsize={args.pop_size}_problocationmutate={args.prob_mutate_location}_probpatchmutate={args.prob_mutate_patch}_fitnesstype={args.fitness_type}"
     output_img_dir = os.path.join(output_dir, "img")
     output_pickle_dir = os.path.join(output_dir, "pickle")
     os.makedirs(output_img_dir, exist_ok=True)
     os.makedirs(output_pickle_dir, exist_ok=True)
     
     MODEL = get_model("restnet_vggface")
-    DATA = LFW(IMG_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_crop_margin_5",
+    DATA = LFW(IMG_DIR=r"lfw_dataset/lfw_dataset/lfw_crop_margin_5",
                MASK_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_lips_mask", 
-               PAIR_PATH=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/pairs.txt",
+               PAIR_PATH=r"lfw_dataset/lfw_dataset/pairs.txt",
                transform=None)
     
     toTensor = transforms.ToTensor()
@@ -52,8 +53,8 @@ if __name__ == "__main__":
     results = []
     
     for i in range(len(DATA)):
-        # if i == 20:
-        #     break
+        if i == 100:
+            break
         
         random.seed(22520691)
         img1, img2, label = DATA[i]
@@ -72,7 +73,8 @@ if __name__ == "__main__":
                         model=MODEL,  # Use the correct model
                         label=label,
                         recons_w=args.recons_w,
-                        attack_w=args.attack_w)
+                        attack_w=args.attack_w,
+                        fitness_type=args.fitness_type)
         
         if args.baseline == "GA":
             algo = GA(n_iter=args.n_iter,
@@ -124,4 +126,4 @@ if __name__ == "__main__":
         with open(output_pickle, 'wb') as f:
                 pkl.dump(result, f)
                         
-    print(f"Success rate: {success_rate / 20}")
+    print(f"Success rate: {success_rate / 100}")

@@ -240,7 +240,7 @@ class NSGAII:
     
     def selection(self, pool: list['Individual']) -> list['Individual']:
         _, adv_scores, fsnr_scores = self.fitness.benchmark(pool)
-        F = np.array(torch.stack([adv_scores, fsnr_scores], dim=1).cpu().detach())
+        F = np.array(torch.stack([-adv_scores, -fsnr_scores], dim=1).cpu().detach())
         fronts = NonDominatedSorting().do(F, n_stop_if_ranked=self.pop.pop_size)
         survivors = []
 
@@ -309,7 +309,6 @@ def calculating_crowding_distance(F):
         F = F[I, np.arange(n_obj)]
 
         # get the distance to the last element in sorted list and replace zeros with actual values
-        # D(x_{i, k} <- D(x_{i, k) + ( F1(x_{i + 1, k}) - F1(x_{i - 1, k-1}) ))
         dist = np.concatenate([F, np.full((1, n_obj), np.inf)]) - np.concatenate([np.full((1, n_obj), -np.inf), F])
 
         index_dist_is_zero = np.where(dist == 0)
