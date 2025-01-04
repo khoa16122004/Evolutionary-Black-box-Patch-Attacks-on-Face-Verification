@@ -117,6 +117,7 @@ class Attack:
             return data 
 
     def completion_procedure(self, adversarial, x_adv, queries, loc, patch, loss_function):
+        final_prediction, final_loss = loss_function(x_adv, self.params["x2"])
         data = {
             "orig": self.params["x1"],
             "second": self.params["x2"],
@@ -126,7 +127,8 @@ class Attack:
             "loc": loc,
             "patch": patch,
             "patch_width": int(math.ceil(self.params["eps"] ** .5)),
-            "final_prediction": loss_function(x_adv, self.params["x2"])[0],
+            "final_prediction": final_prediction,
+            "final_loss": final_loss,
             "process": self.process
         }
         data_final = {
