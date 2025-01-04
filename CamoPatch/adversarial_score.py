@@ -29,12 +29,12 @@ class FaceVerification:
         vec2_tensor = torch.from_numpy(vec2).to(self.device)
         return F.cosine_similarity(vec1_tensor, vec2_tensor, dim=0).cpu().numpy()
 
-    def get_predict(self, pred, threshold=0.5):
-        if isinstance(pred, torch.Tensor):
-            pred = pred.cpu().item()
-        if (pred <= threshold):
-            return 0
-        return 1
+    # def get_predict(self, pred, threshold=0.5):
+    #     if isinstance(pred, torch.Tensor):
+    #         pred = pred.cpu().item()
+    #     if (pred <= threshold):
+    #         return 0
+    #     return 1
 
     def calculate_similarity(self, preds_1, preds_2):
         similarity_scores = F.cosine_similarity(preds_1, preds_2, dim=1)
@@ -54,7 +54,6 @@ class FaceVerification:
         preds1 = self.model(img1_)
         preds2 = self.model(img2_)
         sims = self.calculate_similarity(preds1, preds2)
-        y = self.get_predict(sims)
         
         return sims
 
@@ -69,4 +68,4 @@ class FaceVerification:
             adv_scores = (1 - self.true) * (0.5 - sims) + self.true * (sims - 0.5)
         is_adversarial = True if adv_scores > 0 else False
         # print(adv_scores, is_adversarial, sep='\n')
-        return [is_adversarial, adv_scores]
+        return [is_adversarial, -adv_scores]
