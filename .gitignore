@@ -9,5 +9,6 @@ new*
 *.txt
 *.pt
 *.pkl
+GA*
 *.json
 */results/*

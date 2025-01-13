@@ -6,7 +6,7 @@ from torch import nn
 
 class Fitness:
     
-    def __init__(self, patch_size: int, img1:torch.Tensor, img2: torch.Tensor, model: nn.Module, label: int, recons_w: float, attack_w: float) -> None:
+    def __init__(self, patch_size: int, img1:torch.Tensor, img2: torch.Tensor, model: nn.Module, label: int, recons_w: float, attack_w: float, fitness_type: str) -> None:
         self.img1 = img1.cuda()
         self.img2_feature = model(img2.cuda().unsqueeze(0))
         self.model = model.eval()
@@ -15,7 +15,8 @@ class Fitness:
         self.attack_w = attack_w
         self.recons_w = recons_w
         self.label = label
-        
+        self.fitness_type = fitness_type
+
     def apply_patch_to_image(self, patch: torch.Tensor, location: tuple[int, int, int, int]):
         img_copy = self.img1.clone()
         x_min, x_max, y_min, y_max = location
@@ -32,7 +33,8 @@ class Fitness:
             sims = F.cosine_similarity(adv_features, self.img2_feature, dim=1)
             adv_scores = (1 - self.label) * (0.5 - sims) + self.label * (sims - 0.5)
             
-            # adv_scores = torch.where(adv_scores > 0, torch.tensor(0.0, device=adv_scores.device), adv_scores)
+            if self.fitness_type == "adaptive":
+                adv_scores = torch.where(adv_scores > 0, torch.tensor(0.0, device=adv_scores.device), adv_scores)
             
             return adv_scores
             
