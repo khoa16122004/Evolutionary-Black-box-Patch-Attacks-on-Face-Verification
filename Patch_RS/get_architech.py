@@ -10,7 +10,7 @@ resnet18_url = 'https://download.pytorch.org/models/resnet18-5c106cde.pth'
 def get_model(model_name, path):
     if model_name == "restnet_vggface":     
         model = InceptionResnetV1("vggface2")
-        cp_pack = rf"{path}\vggface2.pt"
+        cp_pack = os.path.join(path, "vggface2.pt")
     elif model_name == "restnet_webface":
         model =  InceptionResnetV1("casia-webface")
         cp_pack = rf"{path}\webface.pt"
