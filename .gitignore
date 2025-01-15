@@ -10,3 +10,5 @@ new*
 *.pt
 *.pkl
 GA*
+*.json
+*/results/*

@@ -1,0 +1,115 @@
+ALGORITHM CamoPatch
+VAR
+    loss_function: UnTargeted
+    n_query: INTEGER (default=1000)
+    sparsity ϵ: FLOAT
+    initial_temperature t: FLOAT (default=300.0)
+    number of circles N: INTEGER (default=100)
+    location scheduler li: INTEGER (default=4)
+    evolutionary step size σ: FLOAT (default=0.1)
+BEGIN
+    x := input_image
+    c, h, w := x.shape
+
+    // Khởi tạo patch và vị trí ban đầu
+    s := sqrt(ϵ) // kích thước patch
+    patch_geno := mảng random(N, 7)
+    patch := render(patch_geno, s)
+    location := random(h - s, size=2) // vị trí patch, tọa độ x, y bất kì
+
+    // Gắn patch khởi tạo vào ảnh
+    x_adv := x.clone()
+    x_adv[location[0]:location[0]+s, location[1]:location[1]+s, :] = patch
+    x_adv = clip(x_adv, 0, 1)
+
+    success, loss := loss_function(x_adv)
+    l2_curr := l2(adv_patch, orig_patch=x[loccation[0]: location[0] + s, location[1]: location[1] + s, :].copy()) 
+
+    patch_counter := 0
+    FOR it FROM 1 TO n_query STEP 1 DO
+        patch_counter +=1
+        IF (patch_counter < update_loc_period) THEN
+            PATCH_UPDATE()
+        ELSE
+            patch_counter = 0
+            LOCATION_UPDATE()
+        END_IF
+    END_FOR
+
+END
+
+FUNCTION PATCH_UPDATE() : 
+BEGIN
+    patch_new_geno = mutate(patch_geno, σ)
+    patch_new = render(patch_new_geno, s)
+
+    // Gắn patch mới vào ảnh
+    x_adv_new = x.clone()
+    x_adv_new[location[0]:location[0]+s, location[1]:location[1]+s, :] = patch_new
+    x_adv_new = clip(x_adv_new, 0, 1)
+
+    // Evaluate loss
+    success_new, loss_new := loss_function(x_adv_new)
+    patch_org = x[loccation[0]: location[0] + s, location[1]: location[1] + s, :].copy()
+    l2_new := l2(patch_new, patch_org)
+
+    // Nếu patch old đã bị tấn công thành công và patch new cũng bị tấn công thành công
+    // => chỉ nhận kết quả nếu như l2 new bé hơn l2 old => patch mới khó nhìn/tốt hơn patch cũ
+    IF (success AND success_new) THEN
+        IF (l2_new < l2_curr) THEN
+            loss = loss_new
+            success = success_new
+            patch_geno = patch_new_geno
+            patch = patch_new
+            l2_curr = l2_new
+            x_adv = x_adv_new
+    ELSE
+        IF (loss_new < loss) THEN
+            loss = loss_new
+            success = success_new
+            patch_geno = patch_new_geno
+            patch = patch_new
+            l2_curr = l2_new
+            x_adv = x_adv_new
+    RETURN value ;
+END
+
+FUNCTION LOCATION_UPDATE() : // Hàm cập nhật vị trí patch dựa vào số iter it hiện tại
+BEGIN
+    // Tính sh_i: scheduler để giảm số lượng vị trí cần kiểm tra => giảm chi phí tính toán/vị trí
+    sh_i := INTEGER(max(sh_selection(n_query, it)*h, 0))
+    location_new := location.copy()
+    location_new := update_location(location_new, sh_i, h, s)
+
+    // Gắn patch cũ vào vị trí mới
+    x_adv_new = x.clone()
+    x_adv_new[location_new[0]:location_new[0]+s, location_new[1]:location_new[1]+s, :] = patch
+    x_adv_new = clip(x_adv_new, 0, 1)
+
+    // Tính loss 
+    success_new, loss_new := loss_function(x_adv_new)
+    patch_org = x[loccation_new[0]: location_new[0] + s, location_new[1]: location_new[1] + s, :].copy()
+    l2_new := l2(patch, patch_org)
+
+    // Nếu cả 2 ảnh trước và ảnh sau đều bị tấn công thành công 
+    //  update dựa trên l2
+    IF success AND success_new THEN
+        IF l2_new < l2_curr THEN
+            loss = loss_new
+            success = success_new
+            location = location_new
+            l2_curr = l2_new
+            x_adv = x_adv_new
+    ELSE // áp dụng stimulated annealing để tối ưu hóa vị trí
+        diff := loss_new - loss
+        curr_temp = t / (it+1)
+        metropolis = exp(-diff / curr_temp)
+
+        IF loss_new < loss OR metropolis > random() THEN
+            loss = loss_new
+            success = success_new
+            location = location_new
+            x_adv = x_adv_new
+            l2_curr = l2_new
+
+END
