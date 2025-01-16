@@ -9,6 +9,8 @@ from dataset import LFW
 import random
 import pickle
 from tqdm import tqdm
+import numpy as np
+import os
 def parse_args():
     parser = argparse.ArgumentParser(description="Patch RS for Image Patch Manipulation")
     parser.add_argument('--patch_size', type=int, default=16, help="Size of the patch")
@@ -23,14 +25,13 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     MODEL = get_model("restnet_vggface", args.pretrained_dir)
-
-    DATA = LFW(IMG_DIR=f"{args.indir}\lfw_crop_margin_5\lfw_crop_margin_5",
+    DATA = LFW(IMG_DIR=os.path.join(args.indir, "lfw_crop_margin_5", "lfw_crop_margin_5"),
                MASK_DIR=r"D:\codePJ\RESEARCH\GECCO2025\lfw_dataset\lfw_lips_mask", 
-               PAIR_PATH=f"{args.indir}\pairs.txt",
+               PAIR_PATH=os.path.join(args.indir, "pairs.txt"),
                transform=None)
     toTensor = transforms.ToTensor()
     all_res = []
-    print("RECON", args.reconstruct)
+    # print("RECON", args.reconstruct)
     for i in tqdm(range(0, 1), desc="Image Processing"):
         random.seed(22520691)
         img1, img2, label = DATA[i]
