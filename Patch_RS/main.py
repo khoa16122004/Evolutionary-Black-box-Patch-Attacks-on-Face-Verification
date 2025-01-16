@@ -20,6 +20,8 @@ def parse_args():
     parser.add_argument('--reconstruct', type=int, default=1)
     parser.add_argument('--indir', type=str, default='\kaggle\input\lfw_dataset')
     parser.add_argument('--pretrained_dir', type=str, default='\kaggle\input\face-verification')
+    parser.add_argument('--num_imgs', type=int, default=100)
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     toTensor = transforms.ToTensor()
     all_res = []
     # print("RECON", args.reconstruct)
-    for i in tqdm(range(0, 1), desc="Image Processing"):
+    for i in tqdm(range(0, args.num_imgs), desc="Image Processing"):
         random.seed(22520691)
         img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
