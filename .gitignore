@@ -2,9 +2,10 @@ lfw_dataset/*
 test_populational/*
 test*
 new*
+arkv*
 *pretrained_model
-# *.png
-# *.jpg
+*.png
+*.jpg
 *.gif
 *.txt
 *.pt
