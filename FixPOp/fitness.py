@@ -8,7 +8,8 @@ class Fitness:
     
     def __init__(self, patch_size: int, img1:torch.Tensor, img2: torch.Tensor, model: nn.Module, label: int, recons_w: float, attack_w: float, fitness_type: str) -> None:
         self.img1 = img1.cuda()
-        self.img2_feature = model(img2.cuda().unsqueeze(0))
+        if img2:
+            self.img2_feature = model(img2.cuda().unsqueeze(0))
         self.model = model.eval()
         self.patch_size = patch_size
         

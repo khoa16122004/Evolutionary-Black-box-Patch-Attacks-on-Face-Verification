@@ -454,11 +454,16 @@ class NSGAII:
 
             # extend the survivors by all or selected individuals
             survivors.extend(front[I])
-            adv_scores_save.append(front[I])
-            psnr_scores_save.append(front[I])
+            index = list(front[I])
+            adv_scores_save.append(adv_scores[index])
+            psnr_scores_save.append(fsnr_scores[index])
+
+            # adv_scores_save.append(pool[front[I]])
+            # psnr_scores_save.append(pool[front[I]])
         
         self.arkive.append({"adv_scores_log": adv_scores_save, "psnr_scores_log": psnr_scores_save}) 
- 
+        for i in range(survivors):
+            indxs = 
         return [pool[i] for i in survivors]
 
     
