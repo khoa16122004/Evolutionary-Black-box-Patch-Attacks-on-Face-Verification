@@ -1,0 +1,5 @@
+opencv-python
+pymoo
+scikit-image
+tqdm
+torch

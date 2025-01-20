@@ -1,0 +1,7 @@
+scikit-image
+opencv-python
+matplotlib
+mtcnn
+tensorflow
+apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+# gdown --folder --id <file_id> 
