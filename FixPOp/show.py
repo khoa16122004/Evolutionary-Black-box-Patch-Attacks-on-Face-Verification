@@ -29,6 +29,7 @@ for file_name in os.listdir(img_dir):
 
 # GA - normal
 
+
 MODEL = get_model("restnet_vggface")
 DATA = LFW(IMG_DIR=r"D:\Path-Recontruction-with-Evolution-Strategy\lfw_dataset\lfw_crop_margin_5",
             MASK_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_lips_mask", 

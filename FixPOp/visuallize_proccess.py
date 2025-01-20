@@ -32,7 +32,7 @@ def main():
                 PAIR_PATH=r"D:\Path-Recontruction-with-Evolution-Strategy\lfw_dataset\pairs.txt",
                 transform=None)
     ######
-    dir_ = r"D:\Path-Recontruction-with-Evolution-Strategy\FixPOp\arkiv_NSGAII_niter=10000_label=0_reconsw=0.0_attackw=1.0_popsize=80_toursize=4_patchsize=80_problocationmutate=0.3_probpatchmutate=0.5_fitnesstype=normal"
+    dir_ = r"D:\Path-Recontruction-with-Evolution-Strategy\FixPOp\seed=22520691_arkiv_NSGAII_niter=10000_label=0_reconsw=0.0_attackw=1.0_popsize=80_toursize=4_patchsize=80_problocationmutate=0.3_probpatchmutate=0.5_fitnesstype=normal"
     
     adv_scores_log = []
     psnr_scores_log = []
@@ -80,16 +80,15 @@ def main():
             iter = log[i]
             current_psnr_scores = iter['psnr_scores_log']
             current_adv_scores = iter['adv_scores_log']
+            
             # print("adv_scores_log: ", current_adv_scores)
             # print("psnr_scores_log: ",current_psnr_scores)
             adv_scores = []
 
             psnr_scores = []
             for j in range(len(current_adv_scores)):
-                adv_scores.extend(list(current_adv_scores[j]))
-                psnr_scores.extend(list(current_psnr_scores[j]))
-            print(max(adv_scores))
-            input("ád")
+                adv_scores.extend(list(current_adv_scores[j].cpu()))
+                psnr_scores.extend(list(current_psnr_scores[j].cpu()))
             adv_scores_log.append(max(adv_scores))
             psnr_scores_log.append(max(psnr_scores))
         

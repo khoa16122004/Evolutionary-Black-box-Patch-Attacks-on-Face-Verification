@@ -462,8 +462,6 @@ class NSGAII:
             # psnr_scores_save.append(pool[front[I]])
         
         self.arkive.append({"adv_scores_log": adv_scores_save, "psnr_scores_log": psnr_scores_save}) 
-        for i in range(survivors):
-            indxs = 
         return [pool[i] for i in survivors]
 
     
