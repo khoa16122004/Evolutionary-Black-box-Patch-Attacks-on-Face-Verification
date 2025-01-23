@@ -13,3 +13,5 @@ arkv*
 GA*
 *.json
 */results/*
+result_*
+results/*
