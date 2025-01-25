@@ -72,7 +72,7 @@ class SparseRSAttack:
                         })
                         continue
                 else:
-                    print("Attack success without reconstruction at iteration ", i-1)
+                    print(f"\nAttack success without reconstruction at iteration ", i-1)
                     break
             if i % self.update_loc_period == 0:
                 patch_loc, _ = self.random_patch(img_shape)
