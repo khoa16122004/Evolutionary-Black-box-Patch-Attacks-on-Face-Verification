@@ -37,10 +37,13 @@ class PatchBruteForce:
         idx = 0
         total_iterations = (img_shape[1] - self.patch_size + 1) * (img_shape[2] - self.patch_size + 1)
         suc_cnt = 0
+
         best_adv_score = float('-inf')
         best_psnr = float('-inf')
         best_psnr_adv, best_adv = None, None
 
+        # debug phase
+        # adv_score_success = []
         with tqdm(total=total_iterations, desc="Processing patches") as pbar:
             for h_start in range(0, img_shape[1] - self.patch_size + 1):
                 for w_start in range(0, img_shape[2] - self.patch_size + 1):
@@ -65,9 +68,11 @@ class PatchBruteForce:
                             "patch_delta": patch_delta,
                             "psnr": psnr.cpu().item(),
                         })
-                        self.save_image(x_adv, os.path.join(self.outdir, f"{self.idx}_{h_start}-{w_start}.png"))
-                        suc_cnt += 1
-                    elif adv_score > best_adv_score:
+                        if adv_score > best_adv_score:
+                            self.save_image(x_adv, os.path.join(self.outdir, f"{self.idx}_{h_start}-{w_start}.png"))
+                        suc_cnt += 1    
+                        # adv_score_success.append(adv_score.cpu().item())
+                    if adv_score > best_adv_score:
                         best_adv_score = adv_score
                         best_adv  = {
                             "adv_score": adv_score.cpu().item(),
@@ -79,9 +84,10 @@ class PatchBruteForce:
                     idx += 1
                     pbar.update(1)
         # os.makedirs(self.outdir, exist_ok=True)
+        print(f"\nSuccess rate: {suc_cnt}/{total_iterations}\n")
+        # print(f"\nDEBUG: {adv_score_success}\n")
         self.save_pickle(os.path.join(self.outdir, f"process_{self.idx}.pkl"))
         self.save_best(x, best_psnr_adv, best_adv, self.outdir)
-        print(f"\nSuccess rate: {suc_cnt}/{total_iterations}\n")
         return patch_delta
     
     def save_pickle(self, path):

@@ -13,7 +13,7 @@ import numpy as np
 import os
 def parse_args():
     parser = argparse.ArgumentParser(description="Patch RS for Image Patch Manipulation")
-    parser.add_argument('--patch_size', type=int, default=16, help="Size of the patch")
+    parser.add_argument('--patch_size', type=int, default=20, help="Size of the patch")
     parser.add_argument('--n_iter', type=int, default=100, help="Number of iterations")
     parser.add_argument('--update_location_iterval', type=int, default=10)
     parser.add_argument('--outdir', type=str, default='results')
@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument('--pretrained_dir', type=str, default='\kaggle\input\face-verification')
     parser.add_argument('--start_idx', type=int, default=0)
     parser.add_argument('--end_idx', type=int, default=100)
-    parser.add_argument('--num_imgs', type=int, default=100)
+    parser.add_argument('--seed', type=int, default=22520692)
 
     return parser.parse_args()
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     all_res = []
     # print("RECON", args.reconstruct)
     for i in tqdm(range(args.start_idx, args.end_idx), desc="Image Processing"):
-        random.seed(22520691)
+        random.seed(args.seed)
         img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         img1_torch, img2_torch = toTensor(img1), toTensor(img2)

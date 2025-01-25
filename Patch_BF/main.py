@@ -20,6 +20,7 @@ def parse_args():
     # parser.add_argument('--num_imgs', type=int, default=100)
     parser.add_argument('--start_idx', type=int, default=0)
     parser.add_argument('--end_idx', type=int, default=100)
+    parser.add_argument('--seed', type=int, default=22520692)
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     all_res = []
     # print("RECON", args.reconstruct)
     for i in tqdm(range(args.start_idx, args.end_idx), desc="Image Processing"):
-        random.seed(22520691)
+        random.seed(args.seed)
         img1, img2, label = DATA[i]
         img1, img2 = img1.resize((160, 160)), img2.resize((160, 160))
         img1_torch, img2_torch = toTensor(img1), toTensor(img2)
