@@ -1,6 +1,5 @@
 # Evolutionary Black-box Patch Attacks on Face Verification
-This repo using genetic algorithms to conduct Black-box Patch Attacks to Face Verification model.
-
+This repository uses genetic algorithms to conduct Black-box Patch Attacks to Face Verification model.
 ![overview](img/overview'.png)
 
 # Propose
