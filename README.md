@@ -65,7 +65,7 @@ This repository contains the official code for our poster paper, *"Evolutionary 
 If you use our source code, please cite our work as:
 
 ```bibtex
-@inproceedings{phan2024mfnas,
+@inproceedings{KhoaLinhGecco2025,
   author       = {Khoa Tran, Linh Ly and Ngoc Hoang Luong},
   title        = {{Evolutionary Black-box Patch Attacks on Face Verification}},
   booktitle    = {GECCO '25 Companion: Proceedings of the Genetic and Evolutionary Computation Conference Companion},
