@@ -21,16 +21,17 @@ def parse_args():
     parser.add_argument('--prob_mutate_patch', type=float, default=0.1, help="Probability of mutating the patch itself")
     parser.add_argument('--n_iter', type=int, default=100, help="Number of iterations for the genetic algorithm")
     parser.add_argument('--tourament_size', type=int, default=3, help="Tournament size for selection")
-    parser.add_argument('--recons_w', type=float, default=0.5)
-    parser.add_argument('--attack_w', type=float, default=0.5)
-    parser.add_argument('--baseline', type=str, default='GA', choices=['GA', 'GA_flag','GA_rules' , 'GA_sequence', 'NSGAII'])
-    parser.add_argument('--update_location_iterval', type=int, default=200)
+    parser.add_argument('--recons_w', type=float, default=0.5, help="Weight for reconstruction fitness")
+    parser.add_argument('--attack_w', type=float, default=0.5, help="Weight for attack fitness")
+    parser.add_argument('--baseline', type=str, default='GA', choices=['GA','GA_rules', 'NSGAII'])
+#     parser.add_argument('--update_location_iterval', type=int, default=200)
     parser.add_argument('--crossover_type', type=str, choices=['UX', 'Blended'])
-    parser.add_argument('--fitness_type', type=str, choices=['normal', 'adaptive'])
-    parser.add_argument('--label', type=int, choices=[0, 1], default=0) 
-    parser.add_argument('--log', type=str)
+    parser.add_argument('--fitness_type', type=str, choices=['normal', 'adaptive'], help="the type of fitness function")
+    parser.add_argument('--label', type=int, choices=[0], default=0) 
+    parser.add_argument('--log', type=str, default="log")
     parser.add_argument('--seed', type=int, default=22520691)
-
+    parser.add_argument('--pair_path', type=str)
+    parser.add_argument('--img_dir', type=str)
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -45,9 +46,9 @@ if __name__ == "__main__":
     os.makedirs(output_pickle_dir, exist_ok=True)
     
     MODEL = get_model("restnet_vggface")
-    DATA = LFW(IMG_DIR=r"D:\Path-Recontruction-with-Evolution-Strategy\lfw_dataset\lfw_crop_margin_5",
+    DATA = LFW(IMG_DIR=args.img_dir,
                MASK_DIR=r"D:/Path-Recontruction-with-Evolution-Strategy/lfw_dataset/lfw_lips_mask", 
-               PAIR_PATH=r"D:\Path-Recontruction-with-Evolution-Strategy\lfw_dataset\pairs.txt",
+               PAIR_PATH=args.pair_path,
                transform=None)
     
     toTensor = transforms.ToTensor()

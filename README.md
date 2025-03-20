@@ -1,36 +1,76 @@
 # Evolutionary Black-box Patch Attacks on Face Verification
-This repository uses genetic algorithms to conduct Black-box Patch Attacks to Face Verification model.
+This repository contains the official code for our poster paper, *"Evolutionary Black-box Patch Attacks on Face Verification"* accepted at GECCO 2025.
+
 ![overview](img/overview'.png)
 
-# Propose
-We propose four version of genetic algorithms with difference target: *combined-objective*, *reconstruction-bias*, *attack-bias* and *bi-objective leverage NSGAII*.
+# Setup
+1. Download Required Files
+    - Download the LFW Dataset (contains image folder and pair annotation file) from [this link](https://vis-www.cs.umass.edu/lfw).
+    - Download the Face Deep Learning Embedding Model from [this link](https://github.com/timesler/facenet-pytorch).
 
-![pipeline](img/pipeline.png)
+    The dataset's image directory should follow this structure:    
+    ```LFW dataset/  
+    │── Identity_Name_1/  
+    │   ├── img1.png  
+    │   ├── img2.png  
+    │   ├── ...  
+    │  
+    │── Identity_Name_2/  
+    │   ├── img1.png  
+    │   ├── img2.png  
+    │   ├── ...  
+    │  
+    │── ... 
+    ```
 
-# Usage
-Firstly, clone the preprocessed data and pretrained face verification model from this [Link](drive.google.com/drive/folders/1CDHDHxG9AYnGs5HHV5IfTNo1V3-YBKmb?usp=sharing).
+2. Clone the Repository and Navigate to the Source Directory
 
-To run the Attacks:
-```cmd
-cd src
-python main.py --pop_size <population size> \
-            --patch_size <patch width (height)> \
-            --prob_mutate_location <mutation probability for location> \
-            --prob_mutate_patch <mutation probability for patch> \
-            --n_iter <number of iterations> \
-            --tourament_size <tournament size> \
-            --recons_w <reconstruction weight> \
-            --attack_w <attack weight> \
-            --baseline <GA | GA_flag | GA_rules | GA_sequence | NSGAII> \
-            --update_location_iterval <update interval> \
-            --crossover_type <UX | Blended> \
-            --fitness_type <normal | adaptive> \
-            --label <0 | 1> \
-            --log <log path> \
-            --seed <random seed>
+    ```cmd
+    $ git clone https://github.com/khoa16122004/Evolutionary-Black-box-Patch-Attacks-on-Face-Verification
+    $ cd Evolutionary-Black-box-Patch-Attacks-on-Face-Verification/src
+    ``` 
+
+# Reproducing the results
+- You can reproduce the results in our paper by runing the following scripts:
+
+    1. Attack by using Genetic Algorithm with `combined-objective` approach.
+        ```cmd
+        $ python main.py --pop_size 80 --patch_size 20 --prob_mutate_location 0.5 --prob_mutate_patch 0.3 --n_iter 10000 --recons_w 0.5 --attack_w 0.5 --baseline GA --fitness_type normal --seed 22520691 --pair_path <pair annotation path> --img_dir <LFW dataset directory>
+        ```
+    2. Attack by using Genetic Algorithm with `reconstruction-bias` approach.
+        ```cmd
+        $ python main.py --pop_size 80 --patch_size 20 --prob_mutate_location 0.5 --prob_mutate_patch 0.3 --n_iter 10000 --recons_w 0.5 --attack_w 0.5 --baseline GA --fitness_type adaptive --seed 22520691 --pair_path <pair annotation path> --img_dir <LFW dataset directory>
+        ```
+
+    3. Attack by using Genetic Algorithm with `attack-bias`.
+        ```cmd
+        $ python main.py --pop_size 80 --patch_size 20 --prob_mutate_location 0.5 --prob_mutate_patch 0.3 --n_iter 10000 --recons_w 0.5 --attack_w 0.5 --baseline GA_rules --fitness_type normal --seed 22520691 --pair_path <pair annotation path> --img_dir <LFW dataset directory>
+        ```
+    4. Attack by leveraging NSGA-II with `1bi-objective` approach.
+        ```cmd
+        $ python main.py --pop_size 80 --patch_size 20 --prob_mutate_location 0.5 --prob_mutate_patch 0.3 --n_iter 10000 --recons_w 0.5 --attack_w 0.5 --baseline NSGAII --fitness_type normal --seed 22520691 --pair_path <pair annotation path> --img_dir <LFW dataset directory>
+        ```
+
+- More details of parameters can be found in [`main.py`](https://github.com/khoa16122004/Evolutionary-Black-box-Patch-Attacks-on-Face-Verification/blob/c8339f47fda09cbc8e210c9a80110754a0afc8ce/src/main.py#L16).
+
+
+# Visualization
+Source code for results visualization can be found here [script/]
+
+
+
+# Citation
+
+If you use our source code, please cite our work as:
+
+```bibtex
+@inproceedings{phan2024mfnas,
+  author       = {Khoa Tran, Linh Ly and Ngoc Hoang Luong},
+  title        = {{Evolutionary Black-box Patch Attacks on Face Verification}},
+  booktitle    = {GECCO '25 Companion: Proceedings of the Genetic and Evolutionary Computation Conference Companion},
+  address      = {Málaga, Spain},
+  publisher    = {{ACM}},
+  year         = {2025}
+}
 ```
-
-# Visual Results
-
-![overview](img/results.png)
 

@@ -98,7 +98,7 @@ axs[1].set_ylabel("PSNR Score")
 axs[1].grid(True)
 axs[1].legend(fontsize=14)
 fig.tight_layout(pad=2.0)
-plt.savefig('iterations_visualize.pdf', format="pdf", bbox_inches="tight")
+# plt.savefig('iterations_visualize.pdf', format="pdf", bbox_inches="tight")
 plt.show()
 
 
