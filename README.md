@@ -23,11 +23,12 @@ This repository contains the official code for our poster paper, *"Evolutionary 
     │── ... 
     ```
 
-2. Clone the Repository and Navigate to the Source Directory
+2. Clone the Repository, Navigate to the Source Directory and Install the requirement packages.
 
     ```cmd
     $ git clone https://github.com/khoa16122004/Evolutionary-Black-box-Patch-Attacks-on-Face-Verification
-    $ cd Evolutionary-Black-box-Patch-Attacks-on-Face-Verification/src
+    $ cd Evolutionary-Black-box-Patch-Attacks-on-Face-Verification
+    $ pip install -r requirements.txt
     ``` 
 
 # Reproducing the results
