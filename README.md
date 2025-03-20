@@ -54,8 +54,8 @@ This repository contains the official code for our poster paper, *"Evolutionary 
 - More details of parameters can be found in [`main.py`](https://github.com/khoa16122004/Evolutionary-Black-box-Patch-Attacks-on-Face-Verification/blob/c8339f47fda09cbc8e210c9a80110754a0afc8ce/src/main.py#L16).
 
 
-# Visualization
-Source code for results visualization can be found here [script/]
+<!-- # Visualization -->
+<!-- Source code for results visualization can be found here [script/] -->
 
 
 
