@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
+  <!-- Replace the content tag with appropriate information -->
+  <meta name="description" content="DESCRIPTION META TAG">
+  <meta property="og:title" content="SOCIAL MEDIA TITLE TAG"/>
+  <meta property="og:description" content="SOCIAL MEDIA DESCRIPTION TAG TAG"/>
+  <meta property="og:url" content="URL OF THE WEBSITE"/>
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
+  <meta property="og:image" content="static/image/your_banner_image.png" />
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+
+
+  <meta name="twitter:title" content="TWITTER BANNER TITLE META TAG">
+  <meta name="twitter:description" content="TWITTER BANNER DESCRIPTION META TAG">
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
+  <meta name="twitter:image" content="static/images/your_twitter_banner_image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Keywords for your paper to be indexed by-->
+  <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <title>Evolutionary Black-box Patch Attacks on Face Verification</title>
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+  rel="stylesheet">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script src="static/js/bulma-carousel.min.js"></script>
+  <script src="static/js/bulma-slider.min.js"></script>
+  <script src="static/js/index.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+</head>
+<body>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Evolutionary Black-box Patch Attacks on Face Verification</h1>
+            <div class="is-size-5 publication-authors">
+              <!-- Paper authors -->
+              <span class="author-block">
+                <a href="FIRST AUTHOR PERSONAL LINK" target="_blank">Khoa Tran</a>,</span>
+                <span class="author-block">
+                  <a href="SECOND AUTHOR PERSONAL LINK" target="_blank">Linh Ly</a>,</span>
+                  <span class="author-block">
+                    <a href="THIRD AUTHOR PERSONAL LINK" target="_blank">Ngoc Hoang Luong</a>
+                  </span>
+                  </div>
+
+                  <div class="is-size-5 publication-authors">
+                    <span class="author-block">University of Information Technology - VNUHCM<br>GECCO 2025 (Accepted Poster)</span>
+                    <!-- <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span> -->
+                  </div>
+
+                  <div class="column has-text-centered">
+                    <div class="publication-links">
+                         <!-- Arxiv PDF link -->
+                      <!-- <span class="link-block">
+                        <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                          <i class="fas fa-file-pdf"></i>
+                        </span>
+                        <span>Paper</span>
+                      </a>
+                    </span> -->
+
+                    <!-- Supplementary PDF link -->
+                    <!-- <span class="link-block">
+                      <a href="static/pdfs/supplementary_material.pdf" target="_blank"
+                      class="external-link button is-normal is-rounded is-dark">
+                      <span class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                      </span>
+                      <span>Supplementary</span>
+                    </a>
+                  </span> -->
+
+                  <!-- Github link -->
+                  <span class="link-block">
+                    <a href="https://github.com/khoa16122004/Evolutionary-Black-box-Patch-Attacks-on-Face-Verification" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+
+                <!-- ArXiv abstract Link -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/<ARXIV PAPER ID>" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv (Comming soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Teaser video-->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered">
+      <img id="tree" src="static/img/overview'.png" alt="Overview" style="max-height: 100%;">
+      <h2 class="subtitle">
+        <p>
+          A <strong style="color:red;">small adversarial patch</strong> placed near the nose significantly lowers the similarity score between two images of the same person (<span style="color:red;">similarity = 0.4938</span>), causing the model to misclassify them as <strong style="color:red;">Different Person</strong>. In contrast, the clean image and another pose variant—without any patch—are correctly identified as <strong style="color:green;">Same Person</strong> (<span style="color:green;">similarity = 0.8933</span>). This highlights how <strong style="color:red;">localized patch attacks</strong> can effectively fool the model with minimal visual changes.
+        </p>
+      </h2>
+    </div>
+  </div>
+</section>
+<!-- End teaser video -->
+
+<!-- Paper abstract -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Deep learning-based face verification systems are typically vulnerable to adversarial attacks, i.e., unnoticeable perturbations of input images making neural network models misrecognize images of the same person. Generating adversarial attacks to evaluate the robustness of these systems is crucial for their reliable deployment. 
+            However, most effective attack methods focus on classification tasks and operate in the white-box setting, where attackers can access the gradient information and the internal architecture of victim models.
+            Such unrealistic scenarios overestimate the adversarial risk.
+            We investigate the potential of crafting adversarial perturbations in the black-box setting, where attackers can observe only input images and output responses of victim models. 
+            We employ the genetic algorithm (GA) to search for adversarial patches that can camouflage well into facial images. The search involves two conflicting objectives: attack performance and reconstruction quality.
+            We consider four GA variants: a GA optimizing the combined fitness function of the two objectives, a GA that favors well-blended adversarial patches, a GA that focuses on attack performance, and a multi-objective GA that optimizes both objectives separately and simultaneously. 
+            Our methods demonstrate strong performance in attacking face verification systems under the realistic black-box setting and generate more natural-looking patches compared to baseline approaches.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End paper abstract -->
+
+
+<!-- Method Section -->
+<section class="section">
+  <div class="container">
+    <h1 class="title has-text-centered">Method Overview</h1>
+    <div class="columns is-centered">
+      <div class="column is-5 has-text-centered">
+        <img src="static/img/pipeline.png" alt="Pipeline" style="max-width: 100%; height: auto;">
+        <p class="mt-2"><strong>Figure 1:</strong> Creating and evaluation of an adversarial patch using Genetic Algorithm (GA)</p>
+      </div>
+      <div class="column is-5 has-text-centered">
+        <img src="static/img/pareto_front.png" alt="Architecture" style="max-width: 80%; height: auto;">
+          <p class="mt-2">
+            <strong>Figure 2:</strong> An example Pareto front of NSGA-II. 
+            <span style="color:green;">Green points</span> represent successful attacks, while 
+            <span style="color:red;">red points</span> represent unsuccessful attacks.
+            The highlighted point in the middle represents the successful attack with the highest 
+            <span>\(\mathcal{F}_\text{recons}\)</span>.
+          </p>
+      </div>
+    </div>
+    <!-- <div class="has-text-centered mt-4">
+      <p>
+        <strong>Our method</strong> leverages a model tree structure to enable efficient expert learning. Each tree is trained independently to preserve local generalization, and a metamodel coordinates predictions across trees.
+      </p>
+    </div> -->
+  </div>
+</section>
+
+<section class="section has-background-light">
+  <div class="container">
+    <h1 class="title has-text-centered">Experimental Results</h1>
+
+    <!-- Result Image 1 -->
+    <div class="box has-text-centered mb-5">
+      <div class="columns is-vcentered">
+        <div class="column is-6">
+          <img src="static/img/results_ex.png" alt="Result A" style="max-width: 100%; height: auto;">
+          <p class="mt-2 is-size-6">
+            <strong>Table 1:</strong> Patch size \(20 \times 20\), population \(N = 80\), mutation \(0.5\).
+          </p>
+        </div>
+        <div class="column is-6">
+          <img src="static/img/iterations_visualize_new_font.png" alt="Result B" style="max-width: 80%; height: auto;">
+          <p class="mt-2 is-size-6">
+            <strong>Figure 3:</strong> Adversarial and PSNR scores of the proposed approaches across \(10,000\) iterations (i.e., generations).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Image 2 -->
+    <div class="box has-text-centered mb-5">
+      <img src="static/img/results.png" alt="Experiment Result 2" style="max-width: 100%; height: auto;">
+      <p class="mt-4">
+        <strong>Figure 4:</strong> Comparison of result images generated by different algorithms. 
+        <span style="color:green;">Green borders</span> indicate successful attacks, and 
+        <span style="color:red;">red borders</span> denote failed attacks.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+
+
+<!-- Paper poster -->
+<!-- <section class="hero is-small is-light">
+  <div class="hero-body">
+    <div class="container">
+      <h2 class="title">Poster</h2>
+
+      <iframe  src="static/pdfs/sample.pdf" width="100%" height="550">
+          </iframe>
+        
+      </div>
+    </div>
+  </section> -->
+<!--End paper poster -->
+
+
+<!--BibTex citation -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code id="bibtex">@inproceedings{KhoaLinhGecco2025,
+  author       = {Khoa Tran, Linh Ly and Ngoc Hoang Luong},
+  title        = {{Evolutionary Black-box Patch Attacks on Face Verification}},
+  booktitle    = {GECCO '25 Companion: Proceedings of the Genetic and Evolutionary Computation Conference Companion},
+  address      = {Málaga, Spain},
+  publisher    = {{ACM}},
+  year         = {2025}
+}</code></pre>
+  </div>
+</section>
+<!--End BibTex citation -->
+
+
+  <footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+
+       <p>
+        Template adapted from <a href="https://nerfies.github.io">Nerfies</a>, licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Statcounter tracking code -->
+  
+<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
+
+    <!-- End of Statcounter Code -->
+
+  </body>
+  </html>
