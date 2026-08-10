@@ -94,7 +94,7 @@ class GA:
             P_final = []
             for i in range(2):
                 random.shuffle(O_P)
-                P_ = self.tourament_selection(O_P)
+                P_ = self.tourament_selection_rules(O_P)
                 P_final.extend(P_)
 
             self.pop.P = P_final
